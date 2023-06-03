@@ -34,6 +34,10 @@ namespace VCS.V_INVENTORY.MODEL.Models
 
         public DateTime BuyDate { get; set; }
 
+        public DateTime CreatedAt { get; set; }
+
+        public DateTime UpdatedAt { get; set; }
+
 #pragma warning restore CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
     }
 }

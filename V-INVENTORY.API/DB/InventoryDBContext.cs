@@ -26,5 +26,36 @@ namespace V_INVENTORY_API.DB
                 .WithMany()
                 .HasForeignKey(i => i.LocationId);
         }
+
+        public override int SaveChanges()
+        {
+            UpdateTimestamps();
+            return base.SaveChanges();
+        }
+
+        public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
+        {
+            UpdateTimestamps();
+            return await base.SaveChangesAsync(cancellationToken);
+        }
+
+        private void UpdateTimestamps()
+        {
+            var entries = ChangeTracker
+                .Entries()
+                .Where(e => e.Entity is ITimestampedEntity && (
+                        e.State == EntityState.Added
+                        || e.State == EntityState.Modified));
+
+            foreach (var entityEntry in entries)
+            {
+                ((ITimestampedEntity)entityEntry.Entity).UpdatedAt = DateTime.Now;
+
+                if (entityEntry.State == EntityState.Added)
+                {
+                    ((ITimestampedEntity)entityEntry.Entity).CreatedAt = DateTime.Now;
+                }
+            }
+        }
     }
 }

@@ -2,7 +2,7 @@
 
 namespace VCS.V_INVENTORY.MODEL.Interfaces
 {
-    public interface IInventoryItem
+    public interface IInventoryItem : ITimestampedEntity
     {
         Guid Id { get; set; }
         string Name { get; set; }
