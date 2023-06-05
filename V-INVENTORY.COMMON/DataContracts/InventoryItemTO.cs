@@ -1,6 +1,6 @@
 ﻿using System.Runtime.Serialization;
 
-namespace VCS.V_INVENTORY.MODEL.DataContracts
+namespace V_INVENTORY.MODEL.DataContracts
 {
     [DataContract]
     public class InventoryItemTO
@@ -22,9 +22,6 @@ namespace VCS.V_INVENTORY.MODEL.DataContracts
 
         [DataMember]
         public decimal OriginalPrice { get; set; }
-
-        [DataMember]
-        public decimal SellPrice { get; set; }
 
         [DataMember]
         public DateTime BuyDate { get; set; }

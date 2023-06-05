@@ -1,8 +1,8 @@
-﻿namespace VCS.V_INVENTORY.MODEL.Interfaces
+﻿namespace V_INVENTORY.MODEL.Interfaces
 {
-    public interface ITimestampedEntity
-    {
-        DateTime CreatedAt { get; set; }
-        DateTime UpdatedAt { get; set; }
-    }
+	public interface ITimestampedEntity
+	{
+		DateTimeOffset CreatedAt { get; set; }
+		DateTimeOffset UpdatedAt { get; set; }
+	}
 }
