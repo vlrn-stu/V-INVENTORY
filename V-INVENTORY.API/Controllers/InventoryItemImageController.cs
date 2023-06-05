@@ -1,5 +1,4 @@
-﻿using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using V_INVENTORY.MODEL.DataContracts;
 using V_INVENTORY.MODEL.Models;
 using V_INVENTORY_API.DB;

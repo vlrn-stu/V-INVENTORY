@@ -6,11 +6,11 @@ namespace V_INVENTORY_API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class InventoryItemODataController : ControllerBase
+    public class InventoryItemLocationODataController : ControllerBase
     {
         private readonly InventoryDbContext _context;
 
-        public InventoryItemODataController(InventoryDbContext context)
+        public InventoryItemLocationODataController(InventoryDbContext context)
         {
             _context = context;
         }
@@ -19,7 +19,7 @@ namespace V_INVENTORY_API.Controllers
         [HttpGet]
         public IActionResult Get()
         {
-            return Ok(_context.InventoryItems);
+            return Ok(_context.InventoryItemLocations);
         }
     }
 }

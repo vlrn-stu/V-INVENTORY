@@ -28,8 +28,8 @@ namespace V_INVENTORY_API.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
-                    b.Property<DateTimeOffset>("BuyDate")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<DateOnly>("BuyDate")
+                        .HasColumnType("date");
 
                     b.Property<DateTimeOffset>("CreatedAt")
                         .HasColumnType("timestamp with time zone");

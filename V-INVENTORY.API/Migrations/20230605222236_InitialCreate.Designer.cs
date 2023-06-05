@@ -12,7 +12,7 @@ using V_INVENTORY_API.DB;
 namespace V_INVENTORY_API.Migrations
 {
     [DbContext(typeof(InventoryDbContext))]
-    [Migration("20230605200522_InitialCreate")]
+    [Migration("20230605222236_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -31,8 +31,8 @@ namespace V_INVENTORY_API.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
-                    b.Property<DateTimeOffset>("BuyDate")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<DateOnly>("BuyDate")
+                        .HasColumnType("date");
 
                     b.Property<DateTimeOffset>("CreatedAt")
                         .HasColumnType("timestamp with time zone");

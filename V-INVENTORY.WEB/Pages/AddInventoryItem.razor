@@ -1,0 +1,104 @@
+﻿@page "/InventoryItem/Add"
+@using Services;
+@using System.Globalization;
+@using V_INVENTORY.MODEL;
+@using V_INVENTORY.MODEL.DataContracts;
+@using V_INVENTORY.MODEL.Models;
+@inject InventoryItemService ItemService
+@inject InventoryItemLocationService LocationService
+@inject IJSRuntime JSRuntime
+
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">Add Inventory Item</div>
+                <div class="card-body">
+                    <EditForm Model="ItemToCreate" OnValidSubmit="HandleValidSubmit">
+                        <DataAnnotationsValidator />
+                        <ValidationSummary />
+
+                        <div class="form-group">
+                            <label for="name">Name:</label>
+                            <InputText id="name" class="form-control" @bind-Value="ItemToCreate.Name" />
+                        </div>
+
+                        <div class="form-group">
+                            <label for="description">Description:</label>
+                            <InputTextArea id="description" class="form-control" @bind-Value="ItemToCreate.Description" />
+                        </div>
+
+                        <div class="form-group">
+                            <label for="quantity">Quantity:</label>
+                            <InputNumber id="quantity" class="form-control" @bind-Value="ItemToCreate.Quantity" />
+                        </div>
+
+                        <div class="form-group">
+                            <label for="location">Location:</label>
+                            <InputSelect id="location" class="form-control" @bind-Value="ItemToCreate.LocationId">
+                                @foreach (var location in Locations)
+                                {
+                                    <option value="@location.Id">@location.Name</option>
+                                }
+                            </InputSelect>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="buyPrice">Buy Price:</label>
+                            <InputText id="buyPrice" class="form-control" @bind-Value="FormattedPrice" @oninput="UpdatePrice" />
+                        </div>
+
+                        <div class="form-group">
+                            <label for="buyDate">Buy Date:</label>
+                            <InputDate id="buyDate" class="form-control" @bind-Value="ItemToCreate.BuyDate" />
+                        </div>
+
+                        <button type="submit" class="btn btn-primary">Submit</button>
+                    </EditForm>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    //private ElementReference imageUpload;
+    private InventoryItemTO ItemToCreate = new InventoryItemTO();
+    private IEnumerable<InventoryItemLocation> Locations = new List<InventoryItemLocation>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        Locations = await LocationService.GetAllInventoryItemLocations();
+        ItemToCreate.BuyDate = DateOnly.FromDateTime(DateTime.Now);
+    }
+
+    private async void HandleValidSubmit()
+    {
+        // Process image
+        //var file = await JSRuntime.InvokeAsync<IJSObjectReference>("getUploadedFile", imageUpload);
+        var result = await ItemService.CreateInventoryItem(ItemToCreate);
+
+        if (result != null)
+        {
+            // Redirect to success page, or show success message
+        }
+        else
+        {
+            // Show error message
+        }
+    }
+
+    string FormattedPrice
+    {
+        get => $"$ {ItemToCreate.OriginalPrice:F2}";
+        set => ItemToCreate.OriginalPrice = decimal.Parse(value, NumberStyles.Currency);
+    }
+
+    void UpdatePrice(ChangeEventArgs e)
+    {
+        if (decimal.TryParse(e.Value?.ToString(), NumberStyles.Currency, CultureInfo.CurrentCulture, out decimal newPrice))
+        {
+            ItemToCreate.OriginalPrice = newPrice;
+        }
+    }
+}
