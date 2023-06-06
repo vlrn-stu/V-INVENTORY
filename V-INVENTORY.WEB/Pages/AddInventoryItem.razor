@@ -7,7 +7,6 @@
 @inject InventoryItemService ItemService
 @inject InventoryItemLocationService LocationService
 @inject InventoryItemImageService ImageService
-@inject IJSRuntime JSRuntime
 @inject NavigationManager Navigation
 
 <style>
@@ -196,12 +195,5 @@
     {
         UploadedImages.Remove(image);
         return Task.CompletedTask;
-    }
-
-    public class UploadedImage
-    {
-        public string? Name { get; set; }
-        public string? ImageData { get; set; }
-        public byte[]? ByteArray { get; set; }
     }
 }
