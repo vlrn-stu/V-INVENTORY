@@ -1,21 +1,21 @@
-﻿@page "/InventoryItem/Add"
+﻿@page "/InventoryItem/Edit/{Id}"
 @using Services;
 @using System.Globalization;
+@using System.Reflection.Metadata;
 @using V_INVENTORY.MODEL;
 @using V_INVENTORY.MODEL.DataContracts;
 @using V_INVENTORY.MODEL.Models;
 @inject InventoryItemService ItemService
 @inject InventoryItemLocationService LocationService
-@inject InventoryItemImageService ImageService
 @inject NavigationManager Navigation
 
 <div class="container mt-4">
     <div class="row justify-content-center">
         <div class="col-md-8">
             <div class="card">
-                <div class="card-header">Add Inventory Item</div>
+                <div class="card-header">Edit Inventory Item</div>
                 <div class="card-body">
-                    <EditForm Model="ItemToCreate" OnValidSubmit="HandleValidSubmit">
+                    <EditForm Model="ItemToEdit" OnValidSubmit="HandleValidSubmit">
                         <DataAnnotationsValidator />
                         <ValidationSummary />
 
@@ -31,22 +31,22 @@
 
                         <div class="form-group">
                             <label for="name">Name:</label>
-                            <InputText id="name" class="form-control" @bind-Value="ItemToCreate.Name" />
+                            <InputText id="name" class="form-control" @bind-Value="ItemToEdit.Name" />
                         </div>
 
                         <div class="form-group">
                             <label for="description">Description:</label>
-                            <InputTextArea id="description" class="form-control" @bind-Value="ItemToCreate.Description" />
+                            <InputTextArea id="description" class="form-control" @bind-Value="ItemToEdit.Description" />
                         </div>
 
                         <div class="form-group">
                             <label for="quantity">Quantity:</label>
-                            <InputNumber id="quantity" class="form-control" @bind-Value="ItemToCreate.Quantity" />
+                            <InputNumber id="quantity" class="form-control" @bind-Value="ItemToEdit.Quantity" />
                         </div>
 
                         <div class="form-group">
                             <label for="location">Location:</label>
-                            <InputSelect id="location" class="form-control" @bind-Value="ItemToCreate.LocationId">
+                            <InputSelect id="location" class="form-control" @bind-Value="ItemToEdit.LocationId">
                                 <option value="">Select a location</option>
                                 @foreach (var location in Locations)
                                 {
@@ -62,10 +62,10 @@
 
                         <div class="form-group">
                             <label for="buyDate">Buy Date:</label>
-                            <InputDate id="buyDate" class="form-control" @bind-Value="ItemToCreate.BuyDate" />
+                            <InputDate id="buyDate" class="form-control" @bind-Value="ItemToEdit.BuyDate" />
                         </div>
 
-                        <div class="form-group mt-2">
+                        @*<div class="form-group mt-2">
                             <label for="imageUpload">Upload Images:</label>
                             <InputFile id="imageUpload" multiple OnChange="e => HandleImageUpload(e)" />
                         </div>
@@ -85,7 +85,7 @@
                                     </div>
                                 </div>
                             }
-                        </div>
+                        </div>*@
 
                         <button type="submit" class="btn btn-primary mt-3">Submit</button>
                     </EditForm>
@@ -96,49 +96,40 @@
 </div>
 
 @code {
-    private InventoryItemTO ItemToCreate = new InventoryItemTO();
+    private InventoryItemTO ItemToEdit = new InventoryItemTO();
     private IEnumerable<InventoryItemLocation> Locations = new List<InventoryItemLocation>();
     private List<string> ErrorMessages { get; set; } = new List<string>();
-    private List<UploadedImage> UploadedImages = new List<UploadedImage>();
+    [Parameter]
+    public string Id { get; set; } = default!;
 
     private string FormattedPrice
     {
-        get => $"$ {ItemToCreate.OriginalPrice:F2}";
-        set => ItemToCreate.OriginalPrice = decimal.Parse(value, NumberStyles.Currency);
+        get => $"$ {ItemToEdit.OriginalPrice:F2}";
+        set => ItemToEdit.OriginalPrice = decimal.Parse(value, NumberStyles.Currency);
     }
 
     protected override async Task OnInitializedAsync()
     {
         Locations = await LocationService.GetAllInventoryItemLocations();
-        ItemToCreate.Quantity = 1;
-        ItemToCreate.BuyDate = DateTimeOffset.UtcNow;
+
+        // Load the existing item details based on the given id
+        var itemModel = await ItemService.GetInventoryItem(Guid.Parse(Id));
+
+        // Convert the model to a transfer object (TO)
+        // Assuming you have a method to do this. Adjust as needed
+        ItemToEdit = ConvertModelToTO(itemModel);
     }
 
     private async Task HandleValidSubmit()
     {
-        var result = await ItemService.CreateInventoryItem(ItemToCreate);
+        var result = await ItemService.UpdateInventoryItem(ItemToEdit);
         if (result != null)
         {
-            foreach (var image in UploadedImages)
-            {
-                var imageResult = await ImageService.CreateInventoryItemImage(new InventoryItemImageTO
-                    {
-                        InventoryItemId = result.Id,
-                        ImageData = image.ByteArray
-                    });
-
-                if (imageResult == null)
-                {
-                    ErrorMessages.Add("Failed to upload image.");
-                    return;
-                }
-            }
-
             Navigation.NavigateTo($"InventoryItem/{result.Id}");
         }
         else
         {
-            ErrorMessages.Add("Failed to create inventory item.");
+            ErrorMessages.Add("Failed to update inventory item.");
         }
     }
 
@@ -146,33 +137,21 @@
     {
         if (decimal.TryParse(e.Value?.ToString(), NumberStyles.Currency, CultureInfo.CurrentCulture, out decimal newPrice))
         {
-            ItemToCreate.OriginalPrice = newPrice;
+            ItemToEdit.OriginalPrice = newPrice;
         }
     }
 
-    private async Task HandleImageUpload(InputFileChangeEventArgs e)
+    private InventoryItemTO ConvertModelToTO(InventoryItem model)
     {
-        foreach (var imageFile in e.GetMultipleFiles())
+        return new InventoryItemTO
         {
-            var format = "image/png"; // Change this as needed
-            var stream = imageFile.OpenReadStream();
-
-            var memoryStream = new MemoryStream();
-            await stream.CopyToAsync(memoryStream);
-
-            var byteArray = memoryStream.ToArray();
-
-            var image = new UploadedImage { Name = imageFile.Name, ByteArray = byteArray };
-
-            image.ImageData = $"data:{format};base64,{Convert.ToBase64String(byteArray)}";
-
-            UploadedImages.Add(image);
-        }
-    }
-
-    private Task RemoveImage(UploadedImage image)
-    {
-        UploadedImages.Remove(image);
-        return Task.CompletedTask;
+            Id = model.Id,
+            Name = model.Name,
+            Description = model.Description,
+            Quantity = model.Quantity,
+            LocationId = model.LocationId,
+            OriginalPrice = model.OriginalPrice,
+            BuyDate = model.BuyDate
+        };
     }
 }

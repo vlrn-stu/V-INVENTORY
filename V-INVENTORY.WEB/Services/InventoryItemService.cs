@@ -54,7 +54,7 @@ namespace Services
                 Encoding.UTF8,
                 "application/json");
 
-            var response = await _httpClient.PutAsync($"InventoryItem/{item.Id}", itemJson);
+            var response = await _httpClient.PutAsync($"InventoryItem", itemJson);
 
             if (response.IsSuccessStatusCode)
             {

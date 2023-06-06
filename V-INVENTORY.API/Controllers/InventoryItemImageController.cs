@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using V_INVENTORY.MODEL.DataContracts;
 using V_INVENTORY.MODEL.Models;
 using V_INVENTORY_API.DB;
@@ -29,6 +30,26 @@ namespace V_INVENTORY_API.Controllers
                 }
 
                 return Ok(image);
+            }
+            catch (Exception)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError);
+            }
+        }
+
+        [HttpGet("InventoryItem/{id}")]
+        public async Task<IActionResult> GetImages(Guid id)
+        {
+            try
+            {
+                var images = await _dbContext.InventoryItemImages.Where(i => i.InventoryItemId == id).ToListAsync();
+
+                if (images == null || !images.Any())
+                {
+                    return NotFound();
+                }
+
+                return Ok(images);
             }
             catch (Exception)
             {
