@@ -37,7 +37,7 @@ namespace V_INVENTORY_API.Controllers
             }
         }
 
-        [HttpGet("InventoryItem/{id}")]
+        [HttpGet("ImagesForItem/{id}")]
         public async Task<IActionResult> GetImages(Guid id)
         {
             try
