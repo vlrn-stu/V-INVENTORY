@@ -74,18 +74,18 @@ namespace V_INVENTORY_API.Controllers
                 var inventoryItem = new InventoryItem
                 {
                     Id = Guid.NewGuid(),
-                    Name = inventoryItemTO.Name ?? throw new ArgumentNullException(inventoryItemTO.Name),
-                    Description = inventoryItemTO.Description ?? throw new ArgumentNullException(inventoryItemTO.Description),
-                    LocationId = inventoryItemTO.LocationId,
+                    Name = inventoryItemTO.Name ?? throw new ArgumentNullException(nameof(inventoryItemTO.Name)),
+                    Description = inventoryItemTO.Description ?? throw new ArgumentNullException(nameof(inventoryItemTO.Description)),
+                    LocationId = inventoryItemTO.LocationId ?? throw new ArgumentNullException(nameof(inventoryItemTO.LocationId)),
                     Quantity = inventoryItemTO.Quantity < 0 ? throw new ArgumentException("Quantity cannot be negative") : inventoryItemTO.Quantity,
                     OriginalPrice = inventoryItemTO.OriginalPrice,
-                    BuyDate = inventoryItemTO.BuyDate
+                    BuyDate = inventoryItemTO.BuyDate.ToOffset(TimeSpan.Zero)
                 };
 
                 _dbContext.InventoryItems.Add(inventoryItem);
                 await _dbContext.SaveChangesAsync();
 
-                return Ok(inventoryItem);
+                return CreatedAtAction(nameof(GetInventoryItem), new { id = inventoryItem.Id }, inventoryItem);
             }
             catch (ArgumentNullException ex)
             {
@@ -118,9 +118,9 @@ namespace V_INVENTORY_API.Controllers
                     return NotFound("Inventory item not found");
                 }
 
-                inventoryItem.Name = inventoryItemTO.Name ?? throw new ArgumentNullException(inventoryItemTO.Name);
-                inventoryItem.Description = inventoryItemTO.Description ?? throw new ArgumentNullException(inventoryItemTO.Description);
-                inventoryItem.LocationId = inventoryItemTO.LocationId;
+                inventoryItem.Name = inventoryItemTO.Name ?? throw new ArgumentNullException(nameof(inventoryItemTO.Name));
+                inventoryItem.Description = inventoryItemTO.Description ?? throw new ArgumentNullException(nameof(inventoryItemTO.Description));
+                inventoryItem.LocationId = inventoryItemTO.LocationId ?? throw new ArgumentNullException(nameof(inventoryItemTO.LocationId));
                 inventoryItem.Quantity = inventoryItemTO.Quantity < 0 ? throw new ArgumentException("Quantity cannot be negative") : inventoryItemTO.Quantity;
                 inventoryItem.OriginalPrice = inventoryItemTO.OriginalPrice;
                 inventoryItem.BuyDate = inventoryItemTO.BuyDate;

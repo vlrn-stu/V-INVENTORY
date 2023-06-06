@@ -62,7 +62,7 @@ namespace V_INVENTORY_API.Controllers
                 _dbContext.InventoryItemImages.Add(image);
                 await _dbContext.SaveChangesAsync();
 
-                return Ok(image);
+                return CreatedAtAction(nameof(GetImage), new { id = image.Id }, image);
             }
             catch (Exception)
             {

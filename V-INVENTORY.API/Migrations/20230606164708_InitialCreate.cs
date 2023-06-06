@@ -33,7 +33,7 @@ namespace V_INVENTORY_API.Migrations
                     LocationId = table.Column<Guid>(type: "uuid", nullable: false),
                     Quantity = table.Column<int>(type: "integer", nullable: false),
                     OriginalPrice = table.Column<decimal>(type: "numeric(18,2)", nullable: false),
-                    BuyDate = table.Column<DateOnly>(type: "date", nullable: false),
+                    BuyDate = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
                     CreatedAt = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
                     UpdatedAt = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false)
                 },

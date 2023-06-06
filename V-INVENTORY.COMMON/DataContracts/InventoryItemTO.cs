@@ -15,25 +15,25 @@ namespace V_INVENTORY.MODEL.DataContracts
         public string? Name { get; set; }
 
         [DataMember]
-        [Required(ErrorMessage = "Description is required.")]
-        public string? Description { get; set; }
+        [StringLength(500, ErrorMessage = "Description is too long.")]
+        public string? Description { get; set; } = "";
 
         [DataMember]
         [Required(ErrorMessage = "Location is required.")]
-        public Guid LocationId { get; set; }
+        public Guid? LocationId { get; set; }
 
         [DataMember]
         [Required(ErrorMessage = "Quantity is required.")]
-        [Range(1, int.MaxValue, ErrorMessage = "Quantity should be greater than 0")]
-        public int Quantity { get; set; }
+        [Range(0, int.MaxValue, ErrorMessage = "Quantity should be greater than 0")]
+        public int Quantity { get; set; } = 1;
 
         [DataMember]
         [Required(ErrorMessage = "Original Price is required.")]
-        [Range(0.01, double.MaxValue, ErrorMessage = "Price should be greater than 0")]
+        [Range(0.00, double.MaxValue, ErrorMessage = "Price should be greater than or equal 0")]
         public decimal OriginalPrice { get; set; }
 
         [DataMember]
         [Required(ErrorMessage = "Buy Date is required.")]
-        public DateOnly BuyDate { get; set; }
+        public DateTimeOffset BuyDate { get; set; } = DateTimeOffset.UtcNow;
     }
 }

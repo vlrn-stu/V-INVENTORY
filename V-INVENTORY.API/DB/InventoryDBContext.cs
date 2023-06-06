@@ -50,11 +50,11 @@ namespace V_INVENTORY_API.DB
 
             foreach (var entityEntry in entries)
             {
-                ((ITimestampedEntity)entityEntry.Entity).UpdatedAt = DateTime.Now;
+                ((ITimestampedEntity)entityEntry.Entity).UpdatedAt = DateTimeOffset.UtcNow;
 
                 if (entityEntry.State == EntityState.Added)
                 {
-                    ((ITimestampedEntity)entityEntry.Entity).CreatedAt = DateTime.Now;
+                    ((ITimestampedEntity)entityEntry.Entity).CreatedAt = DateTimeOffset.UtcNow;
                 }
             }
         }

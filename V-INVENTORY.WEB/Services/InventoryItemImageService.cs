@@ -10,6 +10,7 @@ namespace Services
     public class InventoryItemImageService
     {
         private readonly HttpClient _httpClient;
+        private readonly JsonSerializerOptions _options = new() { PropertyNameCaseInsensitive = true };
 
         public InventoryItemImageService(IHttpClientFactory clientFactory)
         {
@@ -23,7 +24,7 @@ namespace Services
             if (response.IsSuccessStatusCode)
             {
                 var content = await response.Content.ReadAsStringAsync();
-                return JsonSerializer.Deserialize<InventoryItemImage>(content);
+                return JsonSerializer.Deserialize<InventoryItemImage>(content, _options);
             }
 
             return null;
@@ -41,7 +42,7 @@ namespace Services
             if (response.IsSuccessStatusCode)
             {
                 var content = await response.Content.ReadAsStringAsync();
-                return JsonSerializer.Deserialize<InventoryItemImage>(content);
+                return JsonSerializer.Deserialize<InventoryItemImage>(content, _options);
             }
 
             return null;
@@ -65,7 +66,7 @@ namespace Services
             var bitmap = SKBitmap.Decode(stream);
             var image = SKImage.FromBitmap(bitmap);
 
-            var data = image.Encode(SKEncodedImageFormat.Png, 80);
+            var data = image.Encode(SKEncodedImageFormat.Jpeg, 80);
 
             return data.ToArray();
         }

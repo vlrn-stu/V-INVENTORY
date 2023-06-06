@@ -8,6 +8,7 @@ namespace Services
     public class InventoryItemService
     {
         private readonly HttpClient _httpClient;
+        private readonly JsonSerializerOptions _options = new() { PropertyNameCaseInsensitive = true };
 
         public InventoryItemService(IHttpClientFactory clientFactory)
         {
@@ -21,7 +22,7 @@ namespace Services
             if (response.IsSuccessStatusCode)
             {
                 var content = await response.Content.ReadAsStringAsync();
-                return JsonSerializer.Deserialize<InventoryItem>(content);
+                return JsonSerializer.Deserialize<InventoryItem>(content, _options);
             }
 
             return null;
@@ -39,7 +40,8 @@ namespace Services
             if (response.IsSuccessStatusCode)
             {
                 var content = await response.Content.ReadAsStringAsync();
-                return JsonSerializer.Deserialize<InventoryItem>(content);
+                Console.WriteLine(content);
+                return JsonSerializer.Deserialize<InventoryItem>(content, _options);
             }
 
             return null;
@@ -57,7 +59,7 @@ namespace Services
             if (response.IsSuccessStatusCode)
             {
                 var content = await response.Content.ReadAsStringAsync();
-                return JsonSerializer.Deserialize<InventoryItem>(content);
+                return JsonSerializer.Deserialize<InventoryItem>(content, _options);
             }
 
             return null;

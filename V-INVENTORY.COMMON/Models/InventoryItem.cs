@@ -29,7 +29,7 @@ namespace V_INVENTORY.MODEL.Models
         [Column(TypeName = "decimal(18,2)")]
         public decimal OriginalPrice { get; set; }
 
-        public DateOnly BuyDate { get; set; }
+        public DateTimeOffset BuyDate { get; set; }
 
         public DateTimeOffset CreatedAt { get; set; }
 

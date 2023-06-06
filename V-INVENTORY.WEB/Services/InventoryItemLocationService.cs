@@ -7,6 +7,7 @@ namespace Services
     public class InventoryItemLocationService
     {
         private readonly HttpClient _httpClient;
+        private readonly JsonSerializerOptions _options = new() { PropertyNameCaseInsensitive = true };
 
         public InventoryItemLocationService(IHttpClientFactory clientFactory)
         {
@@ -20,8 +21,7 @@ namespace Services
             if (response.IsSuccessStatusCode)
             {
                 var content = await response.Content.ReadAsStringAsync();
-                var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
-                var result = JsonSerializer.Deserialize<List<InventoryItemLocation>>(content, options);
+                var result = JsonSerializer.Deserialize<List<InventoryItemLocation>>(content, _options);
                 return result ?? new List<InventoryItemLocation>();
             }
 
@@ -35,7 +35,7 @@ namespace Services
             if (response.IsSuccessStatusCode)
             {
                 var content = await response.Content.ReadAsStringAsync();
-                return JsonSerializer.Deserialize<InventoryItemLocation>(content);
+                return JsonSerializer.Deserialize<InventoryItemLocation>(content, _options);
             }
 
             return null;
@@ -53,7 +53,7 @@ namespace Services
             if (response.IsSuccessStatusCode)
             {
                 var content = await response.Content.ReadAsStringAsync();
-                return JsonSerializer.Deserialize<InventoryItemLocation>(content);
+                return JsonSerializer.Deserialize<InventoryItemLocation>(content, _options);
             }
 
             return null;
@@ -71,7 +71,7 @@ namespace Services
             if (response.IsSuccessStatusCode)
             {
                 var content = await response.Content.ReadAsStringAsync();
-                return JsonSerializer.Deserialize<InventoryItemLocation>(content);
+                return JsonSerializer.Deserialize<InventoryItemLocation>(content, _options);
             }
 
             return null;

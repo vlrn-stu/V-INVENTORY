@@ -12,6 +12,6 @@ namespace V_INVENTORY.MODEL.Interfaces
         InventoryItemLocation Location { get; set; }
         int Quantity { get; set; }
         decimal OriginalPrice { get; set; }
-        DateOnly BuyDate { get; set; }
+        DateTimeOffset BuyDate { get; set; }
     }
 }
