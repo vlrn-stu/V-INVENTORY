@@ -1,0 +1,86 @@
+﻿@using Services
+@using System.Globalization
+@using System.Reflection.Metadata
+
+<style>
+    .image-wrapper {
+        position: relative;
+        width: 100%;
+        padding-top: 100%;
+        overflow: hidden;
+    }
+
+        .image-wrapper::before {
+            display: block;
+            content: "";
+            width: 100%;
+            padding-top: 100%;
+        }
+
+        .image-wrapper img {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+    .delete-button {
+        position: absolute;
+        top: 0;
+        right: 0;
+    }
+</style>
+
+<div class="form-group mt-2">
+    <label for="imageUpload">Upload Images:</label>
+    <InputFile id="imageUpload" multiple OnChange="e => HandleImageUpload(e)" />
+</div>
+
+<div class="row mt-2">
+    @foreach (var image in UploadedImages)
+    {
+        <div class="col-12 col-sm-6">
+            <div class="card mt-2">
+                <div class="image-wrapper">
+                    <img class="card-img-top img-fluid" src="@image.ImageData" alt="Image thumbnail" />
+                    <button type="button" class="btn btn-danger delete-button" @onclick="() => RemoveImage(image)">X</button>
+                </div>
+                <div class="card-body">
+                    <p class="card-text">@image.Name</p>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter] public List<UploadedImage> UploadedImages { get; set; } = default!;
+
+    private async Task HandleImageUpload(InputFileChangeEventArgs e)
+    {
+        foreach (var imageFile in e.GetMultipleFiles())
+        {
+            var format = "image/png";
+            var stream = imageFile.OpenReadStream();
+
+            var memoryStream = new MemoryStream();
+            await stream.CopyToAsync(memoryStream);
+
+            var byteArray = memoryStream.ToArray();
+
+            var image = new UploadedImage { Name = imageFile.Name, ByteArray = byteArray };
+
+            image.ImageData = $"data:{format};base64,{Convert.ToBase64String(byteArray)}";
+
+            UploadedImages.Add(image);
+        }
+    }
+
+    private Task RemoveImage(UploadedImage image)
+    {
+        UploadedImages.Remove(image);
+        return Task.CompletedTask;
+    }
+}

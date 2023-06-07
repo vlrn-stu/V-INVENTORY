@@ -1,0 +1,74 @@
+﻿@page "/InventoryItem/Search"
+@using Services
+@using V_INVENTORY.MODEL
+@using V_INVENTORY.MODEL.Models;
+@inject InventoryItemService ItemService
+
+<h3>Inventory Search</h3>
+
+<div class="mb-3">
+    <label for="searchBox" class="form-label">Search:</label>
+    <input type="text" class="form-control" id="searchBox" @bind="searchQuery" @onkeyup="SearchItems" />
+
+    <label for="itemCountDropdown" class="form-label">Items per page:</label>
+    <select id="itemCountDropdown" class="form-select" @bind="itemsPerPage">
+        <option value="10">10</option>
+        <option value="25">25</option>
+        <option value="50">50</option>
+    </select>
+</div>
+
+@if (InventoryItems == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Status</th>
+                <th>Location</th>
+                <th>Quantity</th>
+                <th>Description</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in InventoryItems)
+            {
+                <tr>
+                    <td>@item.Name</td>
+                    <td>@item.Status</td>
+                    <td>@item.Location.Name</td>
+                    <td>@item.Quantity</td>
+                    <td>@(item.Description.Length <= 50 ? item.Description : item.Description.Substring(0, 50) + "...")</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+    <p>Total items: @totalCount</p>
+    <!-- Add Pagination Here -->
+}
+
+@code {
+    private List<InventoryItem>? InventoryItems;
+    private string searchQuery = "";
+    private int itemsPerPage = 10;
+    private int totalCount;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var result = await ItemService.GetInventoryItemsWithPagination(top: itemsPerPage);
+        InventoryItems = result.Items;
+        totalCount = result.TotalCount;
+    }
+
+    private async Task SearchItems()
+    {
+        var result = await ItemService.GetInventoryItemsWithPagination(filter: searchQuery, top: itemsPerPage);
+        InventoryItems = result.Items;
+        totalCount = result.TotalCount;
+    }
+}

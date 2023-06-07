@@ -43,7 +43,6 @@ namespace Services
             return null;
         }
 
-
         public async Task<InventoryItemImage?> CreateInventoryItemImage(InventoryItemImageTO itemImageTO)
         {
             var itemImageJson = new StringContent(
