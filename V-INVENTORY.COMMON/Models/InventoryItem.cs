@@ -14,6 +14,8 @@ namespace V_INVENTORY.MODEL.Models
         [Required]
         public string Name { get; set; }
 
+        public InventoryItemStatus Status { get; set; }
+
         public string Description { get; set; }
 
         public ICollection<InventoryItemImage> Images { get; set; }
@@ -36,5 +38,16 @@ namespace V_INVENTORY.MODEL.Models
         public DateTimeOffset UpdatedAt { get; set; }
 
 #pragma warning restore CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
+    }
+
+    public enum InventoryItemStatus
+    {
+        Stored,
+        Sold,
+        Lost,
+        Stolen,
+        Damaged,
+        Destroyed,
+        Other
     }
 }

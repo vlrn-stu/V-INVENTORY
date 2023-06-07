@@ -75,6 +75,7 @@ namespace V_INVENTORY_API.Controllers
                 {
                     Id = Guid.NewGuid(),
                     Name = inventoryItemTO.Name ?? throw new ArgumentNullException(nameof(inventoryItemTO.Name)),
+                    Status = inventoryItemTO.Status,
                     Description = inventoryItemTO.Description ?? throw new ArgumentNullException(nameof(inventoryItemTO.Description)),
                     LocationId = inventoryItemTO.LocationId ?? throw new ArgumentNullException(nameof(inventoryItemTO.LocationId)),
                     Quantity = inventoryItemTO.Quantity < 0 ? throw new ArgumentException("Quantity cannot be negative") : inventoryItemTO.Quantity,
@@ -119,6 +120,7 @@ namespace V_INVENTORY_API.Controllers
                 }
 
                 inventoryItem.Name = inventoryItemTO.Name ?? throw new ArgumentNullException(nameof(inventoryItemTO.Name));
+                inventoryItem.Status = inventoryItemTO.Status;
                 inventoryItem.Description = inventoryItemTO.Description ?? throw new ArgumentNullException(nameof(inventoryItemTO.Description));
                 inventoryItem.LocationId = inventoryItemTO.LocationId ?? throw new ArgumentNullException(nameof(inventoryItemTO.LocationId));
                 inventoryItem.Quantity = inventoryItemTO.Quantity < 0 ? throw new ArgumentException("Quantity cannot be negative") : inventoryItemTO.Quantity;

@@ -19,7 +19,7 @@ namespace Services
 
         public async Task<InventoryItemImage?> GetInventoryItemImage(Guid id)
         {
-            var response = await _httpClient.GetAsync($"inventoryitemimage/{id}");
+            var response = await _httpClient.GetAsync($"InventoryItemImage/{id}");
 
             if (response.IsSuccessStatusCode)
             {
@@ -30,6 +30,20 @@ namespace Services
             return null;
         }
 
+        public async Task<List<InventoryItemImage>?> GetImagesForItem(Guid itemId)
+        {
+            var response = await _httpClient.GetAsync($"InventoryItemImage/ImagesForItem/{itemId}");
+
+            if (response.IsSuccessStatusCode)
+            {
+                var content = await response.Content.ReadAsStringAsync();
+                return JsonSerializer.Deserialize<List<InventoryItemImage>>(content, _options);
+            }
+
+            return null;
+        }
+
+
         public async Task<InventoryItemImage?> CreateInventoryItemImage(InventoryItemImageTO itemImageTO)
         {
             var itemImageJson = new StringContent(
@@ -37,7 +51,7 @@ namespace Services
                 Encoding.UTF8,
                 "application/json");
 
-            var response = await _httpClient.PostAsync("inventoryitemimage", itemImageJson);
+            var response = await _httpClient.PostAsync("InventoryItemImage", itemImageJson);
 
             if (response.IsSuccessStatusCode)
             {
@@ -50,10 +64,10 @@ namespace Services
 
         public async Task<bool> DeleteInventoryItemImage(Guid id)
         {
-            var response = await _httpClient.DeleteAsync($"inventoryitemimage/{id}");
+            var response = await _httpClient.DeleteAsync($"InventoryItemImage/{id}");
 
             return response.IsSuccessStatusCode;
-        }
+        }/*
 
         public static async Task<byte[]> ProcessImage(IBrowserFile file)
         {
@@ -69,6 +83,6 @@ namespace Services
             var data = image.Encode(SKEncodedImageFormat.Jpeg, 80);
 
             return data.ToArray();
-        }
+        }*/
     }
 }

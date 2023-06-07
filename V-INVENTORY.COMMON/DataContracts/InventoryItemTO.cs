@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.Runtime.Serialization;
+using V_INVENTORY.MODEL.Models;
 
 namespace V_INVENTORY.MODEL.DataContracts
 {
@@ -13,6 +14,10 @@ namespace V_INVENTORY.MODEL.DataContracts
         [Required(ErrorMessage = "Name is required.")]
         [StringLength(100, ErrorMessage = "Name is too long.")]
         public string? Name { get; set; }
+
+        [DataMember]
+        [Required(ErrorMessage = "Status is required.")]
+        public InventoryItemStatus Status { get; set; } = InventoryItemStatus.Stored;
 
         [DataMember]
         [StringLength(500, ErrorMessage = "Description is too long.")]

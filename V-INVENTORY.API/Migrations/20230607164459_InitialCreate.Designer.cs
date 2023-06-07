@@ -12,7 +12,7 @@ using V_INVENTORY_API.DB;
 namespace V_INVENTORY_API.Migrations
 {
     [DbContext(typeof(InventoryDbContext))]
-    [Migration("20230606164708_InitialCreate")]
+    [Migration("20230607164459_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -52,6 +52,9 @@ namespace V_INVENTORY_API.Migrations
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<int>("Quantity")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("Status")
                         .HasColumnType("integer");
 
                     b.Property<DateTimeOffset>("UpdatedAt")
