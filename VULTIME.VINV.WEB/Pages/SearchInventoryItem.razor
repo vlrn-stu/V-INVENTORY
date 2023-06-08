@@ -1,0 +1,98 @@
+﻿@page "/InventoryItem/Search"
+@using VULTIME.VINV.Common.Models
+@inject InventoryItemService ItemService
+@inject NavigationManager Navigation
+
+<h3>Inventory Search</h3>
+
+<div class="mb-3">
+    <label for="searchBox" class="form-label">Search:</label>
+    <input type="text" class="form-control" id="searchBox" @oninput="SearchItems" />
+</div>
+
+@if (InventoryItems == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <table class="table table-sm table-bordered table-responsive">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Status</th>
+                <th>Amount</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in InventoryItems)
+            {
+                <tr>
+                    <td><a class="link-info" href="InventoryItem/@item.Id.ToString()">@item.Name</a></td>
+                    <td>@item.Status</td>
+                    <td>@item.Quantity</td>
+                    <td>
+                        <div>
+                            <button class="btn btn-primary" @onclick="() => EditItem(item.Id)">
+                                <span class="oi oi-pencil"></span>
+                                Edit
+                            </button>
+                            <button class="btn btn-danger" @onclick="() => DeleteItem(item.Id)">
+                                <span class="oi oi-trash"></span>
+                                Delete
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+    <PaginationControl @bind-TotalItemCount="@totalCount" @bind-PageSize="@pageSize" PageChanged="HandlePageChanged" />
+}
+
+@code {
+    private List<InventoryItem>? InventoryItems;
+    private string searchQuery = "";
+    private int pageSize = 10;
+    private int totalCount = 0;
+    private int skip = 0;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var result = await ItemService.SearchInventoryItemsByName(top: pageSize);
+        InventoryItems = result.Items;
+        totalCount = result.TotalCount;
+    }
+
+    private async Task UpdateItems()
+    {
+        var result = await ItemService.SearchInventoryItemsByName(searchQuery, skip, pageSize);
+        InventoryItems = result.Items;
+        totalCount = result.TotalCount;
+    }
+
+    private async Task SearchItems(ChangeEventArgs e)
+    {
+        searchQuery = e.Value?.ToString() ?? "";
+        await UpdateItems();
+    }
+
+    private async Task HandlePageChanged(int skip)
+    {
+        this.skip = skip;
+        await UpdateItems();
+    }
+
+    private void EditItem(Guid id)
+    {
+        Navigation.NavigateTo($"/InventoryItem/Edit/{id}");
+    }
+
+    private async Task DeleteItem(Guid id)
+    {
+        await ItemService.DeleteInventoryItem(id);
+        await UpdateItems();
+    }
+}

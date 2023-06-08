@@ -1,0 +1,190 @@
+﻿@page "/InventoryItem/Edit/{Id}"
+@using System.Globalization
+@using System.Reflection.Metadata
+@using VULTIME.VINV.Common.Helpers
+@using VULTIME.VINV.Common.DataContracts
+@using VULTIME.VINV.Common.Models
+@inject InventoryItemService ItemService
+@inject InventoryItemLocationService LocationService
+@inject InventoryItemImageService ImageService
+@inject NavigationManager Navigation
+
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">Edit Inventory Item</div>
+                <div class="card-body">
+                    <EditForm Model="ItemToEdit" OnValidSubmit="HandleValidSubmit">
+                        <DataAnnotationsValidator />
+                        <ValidationSummary />
+
+                        @if (ErrorMessages.Count > 0)
+                        {
+                            <div class="alert alert-danger">
+                                @foreach (var errorMessage in ErrorMessages)
+                                {
+                                    <p>@errorMessage</p>
+                                }
+                            </div>
+                        }
+
+                        <div class="form-group">
+                            <label for="name">Name:</label>
+                            <InputText id="name" class="form-control" @bind-Value="ItemToEdit.Name" />
+                        </div>
+
+                        <div class="form-group">
+                            <label for="status">Status:</label>
+                            <InputSelect id="status" class="form-control" @bind-Value="ItemToEdit.Status">
+                                @foreach (var status in Enum.GetValues(typeof(InventoryItemStatus)))
+                                {
+                                    <option value="@status">@status</option>
+                                }
+                            </InputSelect>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="description">Description:</label>
+                            <InputTextArea id="description" class="form-control" @bind-Value="ItemToEdit.Description" />
+                        </div>
+
+                        <div class="form-group">
+                            <label for="quantity">Quantity:</label>
+                            <InputNumber id="quantity" class="form-control" @bind-Value="ItemToEdit.Quantity" />
+                        </div>
+
+                        <div class="form-group">
+                            <label for="location">Location:</label>
+                            <InputSelect id="location" class="form-control" @bind-Value="ItemToEdit.LocationId">
+                                <option value="">Select a location</option>
+                                @foreach (var location in Locations)
+                                {
+                                    <option value="@location.Id">@location.Name</option>
+                                }
+                            </InputSelect>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="buyPrice">Buy Price:</label>
+                            <InputText id="buyPrice" class="form-control" @bind-Value="FormattedPrice" @oninput="UpdatePrice" />
+                        </div>
+
+                        <div class="form-group">
+                            <label for="buyDate">Buy Date:</label>
+                            <InputDate id="buyDate" class="form-control" @bind-Value="ItemToEdit.BuyDate" />
+                        </div>
+
+                        <div class="form-group mt-2">
+                            <label for="imageUpload">Upload Images:</label>
+                            <ImageUpload UploadedImages="UploadedImages" />
+                        </div>
+
+                        <button type="submit" class="btn btn-primary mt-3">Submit</button>
+                    </EditForm>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    private InventoryItemTO ItemToEdit = new InventoryItemTO();
+    private IEnumerable<InventoryItemLocation> Locations = new List<InventoryItemLocation>();
+    private List<UploadedImage> UploadedImages = new List<UploadedImage>();
+    private List<Guid> OriginalImageIds = new List<Guid>();
+    private List<string> ErrorMessages { get; set; } = new List<string>();
+    [Parameter]
+    public string Id { get; set; } = default!;
+
+    private string FormattedPrice
+    {
+        get => $"$ {ItemToEdit.OriginalPrice:F2}";
+        set => ItemToEdit.OriginalPrice = decimal.Parse(value, NumberStyles.Currency);
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        Locations = await LocationService.GetAllInventoryItemLocations();
+
+        var itemModel = await ItemService.GetInventoryItem(Guid.Parse(Id));
+
+        if (itemModel != null)
+        {
+            ItemToEdit = ModelHelper.ConvertModelToTO(itemModel);
+
+            var images = await ImageService.GetImagesForItem(ItemToEdit.Id);
+
+            if (images != null)
+            {
+                foreach (var image in images)
+                {
+                    UploadedImages.Add(new UploadedImage
+                    {
+                        Name = image.Id.ToString(),
+                        ImageData = $"data:image/png;base64,{Convert.ToBase64String(image.ImageData)}",
+                        ByteArray = null
+                    });
+                    OriginalImageIds.Add(image.Id);
+                }
+            }
+        }
+        else
+        {
+            Navigation.NavigateTo("/404");
+        }
+    }
+
+    private async Task HandleValidSubmit()
+    {
+        var result = await ItemService.UpdateInventoryItem(ItemToEdit);
+        if (result != null)
+        {
+            foreach (var image in UploadedImages.Where(i => i.ByteArray != null))
+            {
+                var imageResult = await ImageService.CreateInventoryItemImage(new InventoryItemImageTO
+                    {
+                        InventoryItemId = result.Id,
+                        ImageData = image.ByteArray
+                    });
+
+                if (imageResult == null)
+                {
+                    ErrorMessages.Add("Failed to upload image.");
+                    return;
+                }
+
+            }
+            foreach (var imageIdString in OriginalImageIds.Select(i => i.ToString()).Except(UploadedImages.Select(i => i.Name)))
+            {
+                if (Guid.TryParse(imageIdString, out Guid imageId))
+                {
+                    var deleteResult = await ImageService.DeleteInventoryItemImage(imageId);
+
+                    if (deleteResult == false)
+                    {
+                        ErrorMessages.Add("Failed to delete image.");
+                        return;
+                    }
+                }
+                else
+                {
+                    continue;
+                }
+            }
+            Navigation.NavigateTo($"InventoryItem/{result.Id}");
+        }
+        else
+        {
+            ErrorMessages.Add("Failed to update inventory item.");
+        }
+    }
+
+    void UpdatePrice(ChangeEventArgs e)
+    {
+        if (decimal.TryParse(e.Value?.ToString(), NumberStyles.Currency, CultureInfo.CurrentCulture, out decimal newPrice))
+        {
+            ItemToEdit.OriginalPrice = newPrice;
+        }
+    }
+}

@@ -1,0 +1,86 @@
+﻿@using VULTIME.VINV.Common.Models
+
+<style>
+    .image-slider {
+        position: relative;
+        width: 100%;
+        overflow: hidden;
+    }
+
+        .image-slider::before {
+            display: block;
+            content: "";
+            width: 100%;
+            padding-top: 100%; /* This creates a 1:1 aspect ratio. */
+        }
+
+    .slider-img {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .control-button {
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
+        background-color: transparent;
+        color: white;
+        border: none;
+        font-size: 2em;
+        padding: 0.625em;
+        cursor: pointer;
+    }
+
+    .left-control {
+        left: 0.625em;
+    }
+
+    .right-control {
+        right: 0.625em;
+    }
+
+</style>
+
+@if (Images?.Count > 0)
+{
+    <div class="image-slider mb-2" @onmouseover="ShowControls" @onmouseout="HideControls">
+
+        <img class="slider-img img-fluid" src="@Images[CurrentImageIndex].ImageData" alt="@Images[CurrentImageIndex].Name">
+
+        <button class="control-button left-control" @onclick="PreviousImage" hidden="@HideControlsFlag">❮</button>
+        <button class="control-button right-control" @onclick="NextImage" hidden="@HideControlsFlag">❯</button>
+    </div>
+}
+
+@code {
+    [Parameter]
+    public List<UploadedImage> Images { get; set; } = default!;
+
+    private int CurrentImageIndex { get; set; } = 0;
+
+    private bool HideControlsFlag { get; set; } = true;
+
+    private void ShowControls()
+    {
+        HideControlsFlag = false;
+    }
+
+    private void HideControls()
+    {
+        HideControlsFlag = true;
+    }
+
+    private void PreviousImage()
+    {
+        CurrentImageIndex = CurrentImageIndex == 0 ? Images.Count - 1 : CurrentImageIndex - 1;
+    }
+
+    private void NextImage()
+    {
+        CurrentImageIndex = CurrentImageIndex == Images.Count - 1 ? 0 : CurrentImageIndex + 1;
+    }
+}

@@ -1,0 +1,143 @@
+﻿@page "/InventoryItem/Add"
+@using System.Globalization;
+@using VULTIME.VINV.Common.DataContracts
+@using VULTIME.VINV.Common.Models
+@inject InventoryItemService ItemService
+@inject InventoryItemLocationService LocationService
+@inject InventoryItemImageService ImageService
+@inject NavigationManager Navigation
+
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">Add Inventory Item</div>
+                <div class="card-body">
+                    <EditForm Model="ItemToCreate" OnValidSubmit="HandleValidSubmit">
+                        <DataAnnotationsValidator />
+                        <ValidationSummary />
+
+                        @if (ErrorMessages.Count > 0)
+                        {
+                            <div class="alert alert-danger">
+                                @foreach (var errorMessage in ErrorMessages)
+                                {
+                                    <p>@errorMessage</p>
+                                }
+                            </div>
+                        }
+
+                        <div class="form-group">
+                            <label for="name">Name:</label>
+                            <InputText id="name" class="form-control" @bind-Value="ItemToCreate.Name" />
+                        </div>
+
+                        <div class="form-group">
+                            <label for="status">Status:</label>
+                            <InputSelect id="status" class="form-control" @bind-Value="ItemToCreate.Status">
+                                @foreach (var status in Enum.GetValues(typeof(InventoryItemStatus)))
+                                {
+                                    <option value="@status">@status</option>
+                                }
+                            </InputSelect>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="description">Description:</label>
+                            <InputTextArea id="description" class="form-control" @bind-Value="ItemToCreate.Description" />
+                        </div>
+
+                        <div class="form-group">
+                            <label for="quantity">Quantity:</label>
+                            <InputNumber id="quantity" class="form-control" @bind-Value="ItemToCreate.Quantity" />
+                        </div>
+
+                        <div class="form-group">
+                            <label for="location">Location:</label>
+                            <InputSelect id="location" class="form-control" @bind-Value="ItemToCreate.LocationId">
+                                <option value="">Select a location</option>
+                                @foreach (var location in Locations)
+                                {
+                                    <option value="@location.Id">@location.Name</option>
+                                }
+                            </InputSelect>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="buyPrice">Buy Price:</label>
+                            <InputText id="buyPrice" class="form-control" @bind-Value="FormattedPrice" @oninput="UpdatePrice" />
+                        </div>
+
+                        <div class="form-group">
+                            <label for="buyDate">Buy Date:</label>
+                            <InputDate id="buyDate" class="form-control" @bind-Value="ItemToCreate.BuyDate" />
+                        </div>
+
+                        <div class="form-group mt-2">
+                            <label for="imageUpload">Upload Images:</label>
+                            <ImageUpload UploadedImages="UploadedImages" />
+                        </div>
+
+                        <button type="submit" class="btn btn-primary mt-3">Submit</button>
+                    </EditForm>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    private InventoryItemTO ItemToCreate = new InventoryItemTO();
+    private IEnumerable<InventoryItemLocation> Locations = new List<InventoryItemLocation>();
+    private List<string> ErrorMessages { get; set; } = new List<string>();
+    private List<UploadedImage> UploadedImages = new List<UploadedImage>();
+
+    private string FormattedPrice
+    {
+        get => $"$ {ItemToCreate.OriginalPrice:F2}";
+        set => ItemToCreate.OriginalPrice = decimal.Parse(value, NumberStyles.Currency);
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        Locations = await LocationService.GetAllInventoryItemLocations();
+        ItemToCreate.Quantity = 1;
+        ItemToCreate.BuyDate = DateTimeOffset.UtcNow;
+    }
+
+    private async Task HandleValidSubmit()
+    {
+        var result = await ItemService.CreateInventoryItem(ItemToCreate);
+        if (result != null)
+        {
+            foreach (var image in UploadedImages)
+            {
+                var imageResult = await ImageService.CreateInventoryItemImage(new InventoryItemImageTO
+                    {
+                        InventoryItemId = result.Id,
+                        ImageData = image.ByteArray
+                    });
+
+                if (imageResult == null)
+                {
+                    ErrorMessages.Add("Failed to upload image.");
+                    return;
+                }
+            }
+
+            Navigation.NavigateTo($"InventoryItem/{result.Id}");
+        }
+        else
+        {
+            ErrorMessages.Add("Failed to create inventory item.");
+        }
+    }
+
+    void UpdatePrice(ChangeEventArgs e)
+    {
+        if (decimal.TryParse(e.Value?.ToString(), NumberStyles.Currency, CultureInfo.CurrentCulture, out decimal newPrice))
+        {
+            ItemToCreate.OriginalPrice = newPrice;
+        }
+    }
+}

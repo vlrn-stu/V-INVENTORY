@@ -1,0 +1,96 @@
+﻿@using System
+@using Microsoft.AspNetCore.Components
+
+<div class="d-flex justify-content-between">
+    <div><u>@TotalItemCount</u> Items in total</div>
+    <div>
+        Items per page:
+        <select @onchange="ChangePageSize">
+            <option value="10">10</option>
+            <option value="25">25</option>
+            <option value="50">50</option>
+        </select>
+    </div>
+</div>
+<div class="d-flex justify-content-center mt-2">
+    <button class="btn btn-primary m-1" @onclick="() => ChangePage(CurrentPage-1)" disabled="@(CurrentPage == 0 ? "disabled" : null)">❮</button>
+    @if (NumberOfPages > 5)
+    {
+        <select @onchange="@((e) => ChangePage(int.Parse(e?.Value?.ToString() ?? "0")))">
+            @for (int i = 0; i < NumberOfPages; i++)
+            {
+                var pageNumber = i + 1;
+                <option value="@(pageNumber-1)" selected="@(CurrentPage == (pageNumber-1))">@pageNumber</option>
+            }
+        </select>
+    }
+    else
+    {
+        @for (int i = 0; i < NumberOfPages; i++)
+        {
+            var pageNumber = i + 1;
+            <button class="btn btn-primary m-1 @(CurrentPage == i ? "active" : "")" @onclick="() => ChangePage(pageNumber-1)">@pageNumber</button>
+        }
+    }
+    <button class="btn btn-primary m-1" @onclick="() => ChangePage(CurrentPage+1)" disabled="@(CurrentPage == NumberOfPages - 1 ? "disabled" : null)">❯</button>
+</div>
+
+@code {
+    private int _totalItemCount;
+    [Parameter]
+    public int TotalItemCount
+    {
+        get { return _totalItemCount; }
+        set
+        {
+            if (_totalItemCount != value)
+            {
+                _totalItemCount = value;
+                TotalItemCountChanged.InvokeAsync(value);
+                StateHasChanged();
+            }
+        }
+    }
+
+    [Parameter]
+    public EventCallback<int> TotalItemCountChanged { get; set; }
+
+    [Parameter]
+    public EventCallback<int> PageChanged { get; set; }
+
+    private int CurrentPage { get; set; }
+
+    private int _pageSize = 10;
+    [Parameter]
+    public int PageSize
+    {
+        get { return _pageSize; }
+        set
+        {
+            if (_pageSize != value)
+            {
+                _pageSize = value;
+                PageSizeChanged.InvokeAsync(value);
+                StateHasChanged();
+            }
+        }
+    }
+
+    [Parameter]
+    public EventCallback<int> PageSizeChanged { get; set; }
+
+    private int NumberOfPages => (int)Math.Ceiling((double)TotalItemCount / PageSize);
+
+    private void ChangePage(int page)
+    {
+        CurrentPage = page;
+        var skip = PageSize * CurrentPage;
+        PageChanged.InvokeAsync(skip);
+    }
+
+    private void ChangePageSize(ChangeEventArgs e)
+    {
+        PageSize = int.Parse(e.Value?.ToString() ?? "0");
+        ChangePage(0);
+    }
+}
