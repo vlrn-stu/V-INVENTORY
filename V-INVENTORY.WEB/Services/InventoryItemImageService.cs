@@ -19,7 +19,7 @@ namespace Services
 
         public async Task<InventoryItemImage?> GetInventoryItemImage(Guid id)
         {
-            var response = await _httpClient.GetAsync($"InventoryItemImage/{id}");
+            var response = await _httpClient.GetAsync($"api/InventoryItemImage/{id}");
 
             if (response.IsSuccessStatusCode)
             {
@@ -32,7 +32,7 @@ namespace Services
 
         public async Task<List<InventoryItemImage>?> GetImagesForItem(Guid itemId)
         {
-            var response = await _httpClient.GetAsync($"InventoryItemImage/ImagesForItem/{itemId}");
+            var response = await _httpClient.GetAsync($"api/InventoryItemImage/ImagesForItem/{itemId}");
 
             if (response.IsSuccessStatusCode)
             {
@@ -50,7 +50,7 @@ namespace Services
                 Encoding.UTF8,
                 "application/json");
 
-            var response = await _httpClient.PostAsync("InventoryItemImage", itemImageJson);
+            var response = await _httpClient.PostAsync("api/InventoryItemImage", itemImageJson);
 
             if (response.IsSuccessStatusCode)
             {
@@ -63,25 +63,9 @@ namespace Services
 
         public async Task<bool> DeleteInventoryItemImage(Guid id)
         {
-            var response = await _httpClient.DeleteAsync($"InventoryItemImage/{id}");
+            var response = await _httpClient.DeleteAsync($"api/InventoryItemImage/{id}");
 
             return response.IsSuccessStatusCode;
-        }/*
-
-        public static async Task<byte[]> ProcessImage(IBrowserFile file)
-        {
-            if (file.Size > 2 * 1024 * 1024)
-            {
-                throw new Exception("File size must be less than 2MB.");
-            }
-
-            await using var stream = file.OpenReadStream(file.Size);
-            var bitmap = SKBitmap.Decode(stream);
-            var image = SKImage.FromBitmap(bitmap);
-
-            var data = image.Encode(SKEncodedImageFormat.Jpeg, 80);
-
-            return data.ToArray();
-        }*/
+        }
     }
 }

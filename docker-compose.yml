@@ -27,6 +27,13 @@ services:
     ports:
       - "6379:6379"
 
+  v-inventory.web:
+    image: ${DOCKER_REGISTRY-}vinventoryweb
+    build:
+      context: .
+      dockerfile: V-INVENTORY.WEB/Dockerfile
+
 volumes:
   db_data:
+
 

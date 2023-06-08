@@ -11,7 +11,7 @@ builder.RootComponents.Add<HeadOutlet>("head::after");
 
 builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri(builder.HostEnvironment.BaseAddress) });
 
-var inventoryBaseUrl = builder.Configuration.GetSection("Api:Inventory:Url").Value ?? "https://localhost:7265/api/";
+var inventoryBaseUrl = builder.Configuration.GetSection("Api:Inventory:Url").Value ?? "https://localhost:7265/";
 
 builder.Services.AddHttpClient("InventoryAPI", client =>
 {

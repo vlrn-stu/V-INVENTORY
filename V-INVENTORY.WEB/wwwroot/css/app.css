@@ -138,3 +138,60 @@ a, .btn-link {
         background-color: var(--secondary-text-color);
         border-color: var(--secondary-text-color);
     }
+
+.table {
+    width: 100%;
+    margin-bottom: 1rem;
+    color: var(--main-text-color);
+    background-color: var(--secondary-bg-color);
+}
+
+    .table th,
+    .table td {
+        padding: 0.75rem;
+        vertical-align: top;
+        border-top: 1px solid var(--secondary-text-color);
+    }
+
+    .table thead th {
+        vertical-align: bottom;
+        border-bottom: 2px solid var(--secondary-text-color);
+    }
+
+    .table tbody + tbody {
+        border-top: 2px solid var(--secondary-text-color);
+    }
+
+.table-sm th,
+.table-sm td {
+    padding: 0.3rem;
+}
+
+.table-bordered {
+    border: 1px solid var(--secondary-text-color);
+}
+
+    .table-bordered th,
+    .table-bordered td {
+        border: 1px solid var(--secondary-text-color);
+    }
+
+    .table-bordered thead th,
+    .table-bordered thead td {
+        border-bottom-width: 2px;
+    }
+
+.table-hover tbody tr:hover {
+    color: var(--main-text-color);
+    background-color: rgba(0, 0, 0, 0.075);
+}
+
+.table-responsive {
+    overflow-x: auto;
+}
+
+@media screen and (max-width: 600px) {
+    table {
+        font-size: 0.8em;
+    }
+}

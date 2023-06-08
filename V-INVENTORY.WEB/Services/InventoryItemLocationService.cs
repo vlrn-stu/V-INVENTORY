@@ -1,6 +1,7 @@
 ﻿using System.Text;
 using System.Text.Json;
 using V_INVENTORY.MODEL.Models;
+using V_INVENTORY.WEB.Shared.Models;
 
 namespace Services
 {
@@ -16,13 +17,13 @@ namespace Services
 
         public async Task<IEnumerable<InventoryItemLocation>> GetAllInventoryItemLocations()
         {
-            var response = await _httpClient.GetAsync("InventoryItemLocationOData");
+            var response = await _httpClient.GetAsync("odata/InventoryItemLocations");
 
             if (response.IsSuccessStatusCode)
             {
                 var content = await response.Content.ReadAsStringAsync();
-                var result = JsonSerializer.Deserialize<List<InventoryItemLocation>>(content, _options);
-                return result ?? new List<InventoryItemLocation>();
+                var result = JsonSerializer.Deserialize<ODataResponse<InventoryItemLocation>>(content, _options);
+                return result?.Value ?? new List<InventoryItemLocation>();
             }
 
             return new List<InventoryItemLocation>();
@@ -30,7 +31,7 @@ namespace Services
 
         public async Task<InventoryItemLocation?> GetInventoryItemLocation(Guid id)
         {
-            var response = await _httpClient.GetAsync($"inventoryitemlocation/{id}");
+            var response = await _httpClient.GetAsync($"api/InventoryItemLocation/{id}");
 
             if (response.IsSuccessStatusCode)
             {
@@ -48,7 +49,7 @@ namespace Services
                 Encoding.UTF8,
                 "application/json");
 
-            var response = await _httpClient.PostAsync("inventoryitemlocation", itemLocationJson);
+            var response = await _httpClient.PostAsync("api/inventoryitemlocation", itemLocationJson);
 
             if (response.IsSuccessStatusCode)
             {
@@ -66,7 +67,7 @@ namespace Services
                 Encoding.UTF8,
                 "application/json");
 
-            var response = await _httpClient.PutAsync($"inventoryitemlocation/{itemLocation.Id}", itemLocationJson);
+            var response = await _httpClient.PutAsync($"api/inventoryitemlocation/{itemLocation.Id}", itemLocationJson);
 
             if (response.IsSuccessStatusCode)
             {
@@ -79,7 +80,7 @@ namespace Services
 
         public async Task<bool> DeleteInventoryItemLocation(Guid id)
         {
-            var response = await _httpClient.DeleteAsync($"inventoryitemlocation/{id}");
+            var response = await _httpClient.DeleteAsync($"api/inventoryitemlocation/{id}");
 
             return response.IsSuccessStatusCode;
         }

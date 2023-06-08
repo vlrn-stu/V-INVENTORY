@@ -48,10 +48,10 @@
 @if (Images?.Count > 0)
 {
     <div class="image-slider mb-2" @onmouseover="ShowControls" @onmouseout="HideControls">
-        <button class="control-button left-control" @onclick="PreviousImage" hidden="@HideControlsFlag">❮</button>
 
         <img class="slider-img img-fluid" src="@Images[CurrentImageIndex].ImageData" alt="@Images[CurrentImageIndex].Name">
 
+        <button class="control-button left-control" @onclick="PreviousImage" hidden="@HideControlsFlag">❮</button>
         <button class="control-button right-control" @onclick="NextImage" hidden="@HideControlsFlag">❯</button>
     </div>
 }

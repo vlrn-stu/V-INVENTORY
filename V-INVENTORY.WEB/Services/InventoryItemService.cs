@@ -3,22 +3,24 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using V_INVENTORY.MODEL.DataContracts;
 using V_INVENTORY.MODEL.Models;
+using V_INVENTORY.WEB.Shared.Models;
 
 namespace Services
 {
     public class InventoryItemService
     {
         private readonly HttpClient _httpClient;
-        private readonly JsonSerializerOptions _options = new() { PropertyNameCaseInsensitive = true };
+        private readonly JsonSerializerOptions _options = new() { PropertyNameCaseInsensitive = true};
 
         public InventoryItemService(IHttpClientFactory clientFactory)
         {
             _httpClient = clientFactory.CreateClient("InventoryAPI");
+            _options.Converters.Add(new JsonStringEnumConverter());
         }
 
         public async Task<InventoryItem?> GetInventoryItem(Guid id)
         {
-            var response = await _httpClient.GetAsync($"InventoryItem/{id}");
+            var response = await _httpClient.GetAsync($"api/InventoryItem/{id}");
 
             if (response.IsSuccessStatusCode)
             {
@@ -29,16 +31,16 @@ namespace Services
             return null;
         }
 
-        public async Task<(List<InventoryItem>? Items, int TotalCount)> GetInventoryItemsWithPagination(string filter = "", int skip = 0, int top = 10)
+        public async Task<(List<InventoryItem>? Items, int TotalCount)> SearchInventoryItemsOData(string filter = "", int skip = 0, int top = 10)
         {
             var filterQuery = string.IsNullOrEmpty(filter) ? "" : $"&$filter={filter}";
-            var response = await _httpClient.GetAsync($"InventoryItemOData/WithLocation?$skip={skip}&$top={top}&$count=true{filterQuery}");
+            var response = await _httpClient.GetAsync($"odata/InventoryItems?$skip={skip}&$top={top}&$count=true{filterQuery}");
 
             if (response.IsSuccessStatusCode)
             {
                 var content = await response.Content.ReadAsStringAsync();
-                var result = JsonSerializer.Deserialize<SearchResponse>(content, _options);
-                return (result?.Items, result?.TotalCount ?? 0);
+                var result = JsonSerializer.Deserialize<ODataResponse<InventoryItem>>(content, _options);
+                return (result?.Value, result?.Count ?? 0);
             }
 
             return (null, 0);
@@ -57,7 +59,7 @@ namespace Services
                 Encoding.UTF8,
                 "application/json");
 
-            var response = await _httpClient.PostAsync("InventoryItem", itemJson);
+            var response = await _httpClient.PostAsync("api/InventoryItem", itemJson);
 
             if (response.IsSuccessStatusCode)
             {
@@ -76,7 +78,7 @@ namespace Services
                 Encoding.UTF8,
                 "application/json");
 
-            var response = await _httpClient.PutAsync($"InventoryItem", itemJson);
+            var response = await _httpClient.PutAsync($"api/InventoryItem", itemJson);
 
             if (response.IsSuccessStatusCode)
             {
@@ -89,7 +91,7 @@ namespace Services
 
         public async Task<bool> DeleteInventoryItem(Guid id)
         {
-            var response = await _httpClient.DeleteAsync($"InventoryItem/{id}");
+            var response = await _httpClient.DeleteAsync($"api/InventoryItem/{id}");
 
             return response.IsSuccessStatusCode;
         }

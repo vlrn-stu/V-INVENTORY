@@ -3,19 +3,13 @@
 @using V_INVENTORY.MODEL
 @using V_INVENTORY.MODEL.Models;
 @inject InventoryItemService ItemService
+@inject NavigationManager Navigation
 
 <h3>Inventory Search</h3>
 
 <div class="mb-3">
     <label for="searchBox" class="form-label">Search:</label>
-    <input type="text" class="form-control" id="searchBox" @bind="searchQuery" @onkeyup="SearchItems" />
-
-    <label for="itemCountDropdown" class="form-label">Items per page:</label>
-    <select id="itemCountDropdown" class="form-select" @bind="itemsPerPage">
-        <option value="10">10</option>
-        <option value="25">25</option>
-        <option value="50">50</option>
-    </select>
+    <input type="text" class="form-control" id="searchBox" @oninput="SearchItems" />
 </div>
 
 @if (InventoryItems == null)
@@ -24,51 +18,81 @@
 }
 else
 {
-    <table class="table">
+    <table class="table table-bordered table-responsive">
         <thead>
             <tr>
                 <th>Name</th>
                 <th>Status</th>
-                <th>Location</th>
                 <th>Quantity</th>
-                <th>Description</th>
+                <th>Actions</th>
             </tr>
         </thead>
         <tbody>
             @foreach (var item in InventoryItems)
             {
                 <tr>
-                    <td>@item.Name</td>
+                    <td><a class="link-info" href="InventoryItem/@item.Id.ToString()">@item.Name</a></td>
                     <td>@item.Status</td>
-                    <td>@item.Location.Name</td>
                     <td>@item.Quantity</td>
-                    <td>@(item.Description.Length <= 50 ? item.Description : item.Description.Substring(0, 50) + "...")</td>
+                    <td>
+                        <button class="btn btn-primary" @onclick="() => EditItem(item.Id)">
+                            <span class="oi oi-pencil"></span>
+                            Edit
+                        </button>
+                        <button class="btn btn-danger" @onclick="() => DeleteItem(item.Id)">
+                            <span class="oi oi-trash"></span>
+                            Delete
+                        </button>
+                    </td>
                 </tr>
             }
         </tbody>
     </table>
 
-    <p>Total items: @totalCount</p>
-    <!-- Add Pagination Here -->
+    <PaginationControl @bind-TotalItemCount="@totalCount" @bind-PageSize="@pageSize" PageChanged="HandlePageChanged" />
 }
 
 @code {
     private List<InventoryItem>? InventoryItems;
     private string searchQuery = "";
-    private int itemsPerPage = 10;
-    private int totalCount;
+    private int pageSize = 10;
+    private int totalCount = 0;
+    private int skip = 0;
 
     protected override async Task OnInitializedAsync()
     {
-        var result = await ItemService.GetInventoryItemsWithPagination(top: itemsPerPage);
+        var result = await ItemService.SearchInventoryItemsOData(top: pageSize);
         InventoryItems = result.Items;
         totalCount = result.TotalCount;
     }
 
-    private async Task SearchItems()
+    private async Task UpdateItems()
     {
-        var result = await ItemService.GetInventoryItemsWithPagination(filter: searchQuery, top: itemsPerPage);
+        var result = await ItemService.SearchInventoryItemsOData(filter: $"Contains(Name,'{searchQuery}')", top: pageSize, skip: skip);
         InventoryItems = result.Items;
         totalCount = result.TotalCount;
+    }
+
+    private async Task SearchItems(ChangeEventArgs e)
+    {
+        searchQuery = e.Value?.ToString() ?? "";
+        await UpdateItems();
+    }
+
+    private async Task HandlePageChanged(int skip)
+    {
+        this.skip = skip;
+        await UpdateItems();
+    }
+
+    private void EditItem(Guid id)
+    {
+        Navigation.NavigateTo($"/InventoryItem/Edit/{id}");
+    }
+
+    private async Task DeleteItem(Guid id)
+    {
+        await ItemService.DeleteInventoryItem(id);
+        await UpdateItems();
     }
 }
