@@ -1,6 +1,8 @@
-﻿using System.Text;
+﻿using System.Net;
+using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using System.Text.RegularExpressions;
 using V_INVENTORY.MODEL.DataContracts;
 using V_INVENTORY.MODEL.Models;
 using V_INVENTORY.WEB.Shared.Models;
@@ -10,7 +12,7 @@ namespace Services
     public class InventoryItemService
     {
         private readonly HttpClient _httpClient;
-        private readonly JsonSerializerOptions _options = new() { PropertyNameCaseInsensitive = true};
+        private readonly JsonSerializerOptions _options = new() { PropertyNameCaseInsensitive = true };
 
         public InventoryItemService(IHttpClientFactory clientFactory)
         {
@@ -31,9 +33,9 @@ namespace Services
             return null;
         }
 
-        public async Task<(List<InventoryItem>? Items, int TotalCount)> SearchInventoryItemsOData(string filter = "", int skip = 0, int top = 10)
+        public async Task<(List<InventoryItem>? Items, int TotalCount)> SearchInventoryItemsByName(string nameFilter = "", int skip = 0, int top = 10)
         {
-            var filterQuery = string.IsNullOrEmpty(filter) ? "" : $"&$filter={filter}";
+            var filterQuery = string.IsNullOrEmpty(nameFilter) ? "" : $"&$filter=Contains(Name,'{Regex.Replace(nameFilter, "[^a-zA-Z0-9_]+", "")}')";
             var response = await _httpClient.GetAsync($"odata/InventoryItems?$skip={skip}&$top={top}&$count=true{filterQuery}");
 
             if (response.IsSuccessStatusCode)

@@ -16,6 +16,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		.editorconfig = .editorconfig
 	EndProjectSection
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VULTIME.Core.Data", "..\VULTIME\VULTIME.Core.Data\VULTIME.Core.Data.csproj", "{2E0AC234-8195-4B8E-898E-9BC961B773FE}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -38,6 +40,10 @@ Global
 		{4503F670-CF68-42C9-B8FE-58BB1EEEEFAE}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{4503F670-CF68-42C9-B8FE-58BB1EEEEFAE}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{4503F670-CF68-42C9-B8FE-58BB1EEEEFAE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2E0AC234-8195-4B8E-898E-9BC961B773FE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2E0AC234-8195-4B8E-898E-9BC961B773FE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2E0AC234-8195-4B8E-898E-9BC961B773FE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2E0AC234-8195-4B8E-898E-9BC961B773FE}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

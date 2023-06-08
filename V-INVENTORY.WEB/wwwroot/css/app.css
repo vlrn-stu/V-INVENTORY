@@ -21,7 +21,8 @@ html, body, main {
 }
 
 .sidebar {
-    background: linear-gradient(180deg, var(--main-background-color), var(--accent-color)) !important;
+    background: var(--main-bg-color);
+    background: linear-gradient(180deg, var(--main-bg-color) 75%, var(--primary-accent-color) 100%) !important;
 }
 
 h1:focus {

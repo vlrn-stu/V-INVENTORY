@@ -18,7 +18,7 @@ namespace V_INVENTORY_API.Controllers
         }
 
         [HttpGet("{id}")]
-        public async Task<IActionResult> GetInventoryItem(Guid id)
+        public async Task<IActionResult> GetInventoryItem([FromRoute] Guid id)
         {
             try
             {
@@ -40,8 +40,8 @@ namespace V_INVENTORY_API.Controllers
             }
         }
 
-        [HttpGet("{id}/minimal")]
-        public async Task<IActionResult> GetInventoryItemMinimal(Guid id)
+        [HttpGet("{id}/Minimal")]
+        public async Task<IActionResult> GetInventoryItemMinimal([FromRoute] Guid id)
         {
             try
             {
@@ -57,6 +57,50 @@ namespace V_INVENTORY_API.Controllers
             catch (Exception ex)
             {
                 return NotFound(ex.Message);
+            }
+        }
+
+        [HttpGet("ByLocation/{locationId}")]
+        public async Task<IActionResult> GetInventoryItemsByLocation([FromRoute] Guid locationId)
+        {
+            try
+            {
+                var location = await _dbContext.InventoryItemLocations.FindAsync(locationId);
+                if (location == null)
+                {
+                    return NotFound("Location not found");
+                }
+                var inventoryItems = await _dbContext.InventoryItems
+                    .Include(i => i.Images)
+                    .Include(i => i.Location)
+                    .Where(i => i.LocationId == locationId)
+                    .ToListAsync();
+                return Ok(inventoryItems);
+            }
+            catch (Exception)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError);
+            }
+        }
+
+        [HttpGet("ByLocation/{locationId}/Minimal")]
+        public async Task<IActionResult> GetInventoryItemsByLocationMinimal([FromRoute] Guid locationId)
+        {
+            try
+            {
+                var location = await _dbContext.InventoryItemLocations.FindAsync(locationId);
+                if (location == null)
+                {
+                    return NotFound("Location not found");
+                }
+                var inventoryItems = await _dbContext.InventoryItems
+                    .Where(i => i.LocationId == locationId)
+                    .ToListAsync();
+                return Ok(inventoryItems);
+            }
+            catch (Exception)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError);
             }
         }
 
@@ -147,7 +191,7 @@ namespace V_INVENTORY_API.Controllers
         }
 
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteInventoryItem(Guid id)
+        public async Task<IActionResult> DeleteInventoryItem([FromRoute] Guid id)
         {
             try
             {

@@ -61,14 +61,14 @@ else
 
     protected override async Task OnInitializedAsync()
     {
-        var result = await ItemService.SearchInventoryItemsOData(top: pageSize);
+        var result = await ItemService.SearchInventoryItemsByName(top: pageSize);
         InventoryItems = result.Items;
         totalCount = result.TotalCount;
     }
 
     private async Task UpdateItems()
     {
-        var result = await ItemService.SearchInventoryItemsOData(filter: $"Contains(Name,'{searchQuery}')", top: pageSize, skip: skip);
+        var result = await ItemService.SearchInventoryItemsByName(searchQuery, skip, pageSize);
         InventoryItems = result.Items;
         totalCount = result.TotalCount;
     }

@@ -35,7 +35,7 @@
                                 <p><strong>Quantity: </strong>@ItemToView.Quantity</p>
                                 <p><strong>Location: </strong>@ItemToView.Location.Name</p>
                                 <p><strong>Buy Price: </strong>@FormattedPrice</p>
-                                <p><strong>Buy Date: </strong>@ItemToView.BuyDate</p>
+                                <p><strong>Buy Date: </strong>@ItemToView.BuyDate.ToString("yyyy-MM-dd")</p>
                                 
                                 @if (ItemToView.Description != null && !string.IsNullOrWhiteSpace(ItemToView.Description))
                                 {
@@ -90,6 +90,6 @@
     private async Task DeleteItem()
     {
         await ItemService.DeleteInventoryItem(Guid.Parse(Id));
-        Navigation.NavigateTo("/Success");
+        Navigation.NavigateTo("/InventoryItem/Search");
     }
 }
