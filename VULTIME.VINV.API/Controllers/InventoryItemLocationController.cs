@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using VULTIME.VINV.Common.Models;
-using VULTIME.VINV.Common.DataContracts;
 using VULTIME.VINV.API.DB;
+using VULTIME.VINV.Common.DataContracts;
+using VULTIME.VINV.Common.Models;
 
 namespace VULTIME.VINV.API.Controllers
 {
@@ -21,14 +21,9 @@ namespace VULTIME.VINV.API.Controllers
         {
             try
             {
-                var location = await _dbContext.InventoryItemLocations.FindAsync(id);
+                InventoryItemLocation? location = await _dbContext.InventoryItemLocations.FindAsync(id);
 
-                if (location == null)
-                {
-                    return NotFound();
-                }
-
-                return Ok(location);
+                return location == null ? NotFound() : Ok(location);
             }
             catch (Exception)
             {
@@ -41,14 +36,14 @@ namespace VULTIME.VINV.API.Controllers
         {
             try
             {
-                var location = new InventoryItemLocation
+                InventoryItemLocation location = new()
                 {
                     Id = Guid.NewGuid(),
                     Name = locationTO.Name ?? throw new ArgumentNullException(locationTO.Name)
                 };
 
-                _dbContext.InventoryItemLocations.Add(location);
-                await _dbContext.SaveChangesAsync();
+                _ = _dbContext.InventoryItemLocations.Add(location);
+                _ = await _dbContext.SaveChangesAsync();
 
                 return Ok(location);
             }
@@ -67,15 +62,15 @@ namespace VULTIME.VINV.API.Controllers
         {
             try
             {
-                var location = await _dbContext.InventoryItemLocations.FindAsync(locationTO.Id);
+                InventoryItemLocation? location = await _dbContext.InventoryItemLocations.FindAsync(locationTO.Id);
                 if (location == null)
                 {
                     return NotFound("Location not found");
                 }
 
                 location.Name = locationTO.Name ?? throw new ArgumentNullException(locationTO.Name);
-                _dbContext.InventoryItemLocations.Update(location);
-                await _dbContext.SaveChangesAsync();
+                _ = _dbContext.InventoryItemLocations.Update(location);
+                _ = await _dbContext.SaveChangesAsync();
 
                 return Ok(location);
             }
@@ -94,14 +89,14 @@ namespace VULTIME.VINV.API.Controllers
         {
             try
             {
-                var location = await _dbContext.InventoryItemLocations.FindAsync(id);
+                InventoryItemLocation? location = await _dbContext.InventoryItemLocations.FindAsync(id);
                 if (location == null)
                 {
                     return NotFound("Location not found");
                 }
 
-                _dbContext.InventoryItemLocations.Remove(location);
-                await _dbContext.SaveChangesAsync();
+                _ = _dbContext.InventoryItemLocations.Remove(location);
+                _ = await _dbContext.SaveChangesAsync();
 
                 return Ok();
             }

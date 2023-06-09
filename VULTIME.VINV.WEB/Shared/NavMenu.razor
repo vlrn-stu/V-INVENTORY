@@ -1,39 +1,45 @@
-﻿<div class="top-row ps-3 navbar navbar-dark">
+﻿@inject NavigationManager Navigation
+<nav class="navbar navbar-expand-md navbar-dark bg-secondary mb-4">
     <div class="container-fluid">
         <a class="navbar-brand" href="">VINV</a>
-        <button title="Navigation menu" class="navbar-toggler" @onclick="ToggleNavMenu">
+        <button class="navbar-toggler @NavButtonCssClass" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse"
+                aria-controls="navbarCollapse" aria-label="Toggle navigation" @onclick="ToggleNavMenu">
             <span class="navbar-toggler-icon"></span>
         </button>
+        <div class="collapse navbar-collapse @NavBarCssClass" id="navbarCollapse">
+            <ul class="navbar-nav me-auto mb-2 mb-md-0">
+                <li class="nav-item">
+                    <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
+                        <span class="oi oi-home" aria-hidden="true"></span> Home
+                    </NavLink>
+                </li>
+                <li class="nav-item">
+                    <NavLink class="nav-link" href="InventoryItem/Add">
+                        <span class="oi oi-plus" aria-hidden="true"></span> Add Item
+                    </NavLink>
+                </li>
+            </ul>
+            <form class="d-md-block my-2 my-lg-0 ml-lg-3 align-content-center" @onsubmit="Search">
+                <input class="form-control" type="search" placeholder="Search Items" aria-label="Search" @bind="searchQuery"/>
+            </form>
+        </div>
     </div>
-</div>
-
-<div class="@NavMenuCssClass" @onclick="ToggleNavMenu">
-    <nav class="flex-column">
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
-                <span class="oi oi-home" aria-hidden="true"></span> Home
-            </NavLink>
-        </div>
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="InventoryItem/Add">
-                <span class="oi oi-plus" aria-hidden="true"></span> Add Item
-            </NavLink>
-        </div>
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="InventoryItem/Search">
-                <span class="oi oi-magnifying-glass" aria-hidden="true"></span> Search Items
-            </NavLink>
-        </div>
-    </nav>
-</div>
+</nav>
 
 @code {
     private bool collapseNavMenu = true;
-
-    private string? NavMenuCssClass => collapseNavMenu ? "collapse" : null;
+    private string? NavBarCssClass => collapseNavMenu ? null : "show";
+    private string? NavButtonCssClass => collapseNavMenu ? "collapsed" : null;
+    private string searchQuery = "";
 
     private void ToggleNavMenu()
     {
         collapseNavMenu = !collapseNavMenu;
+    }
+
+    private void Search()
+    {
+        Navigation.NavigateTo($"/InventoryItem/Search?q={searchQuery}");
+        StateHasChanged();
     }
 }

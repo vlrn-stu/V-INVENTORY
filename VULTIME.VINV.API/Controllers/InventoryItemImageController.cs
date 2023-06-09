@@ -1,8 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using VULTIME.VINV.Common.Models;
-using VULTIME.VINV.Common.DataContracts;
 using VULTIME.VINV.API.DB;
+using VULTIME.VINV.Common.DataContracts;
+using VULTIME.VINV.Common.Models;
 
 namespace VULTIME.VINV.API.Controllers
 {
@@ -22,14 +22,9 @@ namespace VULTIME.VINV.API.Controllers
         {
             try
             {
-                var image = await _dbContext.InventoryItemImages.FindAsync(id);
+                InventoryItemImage? image = await _dbContext.InventoryItemImages.FindAsync(id);
 
-                if (image == null)
-                {
-                    return NotFound();
-                }
-
-                return Ok(image);
+                return image == null ? NotFound() : Ok(image);
             }
             catch (Exception)
             {
@@ -42,14 +37,9 @@ namespace VULTIME.VINV.API.Controllers
         {
             try
             {
-                var images = await _dbContext.InventoryItemImages.Where(i => i.InventoryItemId == id).ToListAsync();
+                List<InventoryItemImage> images = await _dbContext.InventoryItemImages.Where(i => i.InventoryItemId == id).ToListAsync();
 
-                if (images == null || !images.Any())
-                {
-                    return NotFound();
-                }
-
-                return Ok(images);
+                return images == null || !images.Any() ? NotFound() : Ok(images);
             }
             catch (Exception)
             {
@@ -62,7 +52,7 @@ namespace VULTIME.VINV.API.Controllers
         {
             try
             {
-                var inventoryItem = await _dbContext.InventoryItems.FindAsync(imageTO.InventoryItemId);
+                InventoryItem? inventoryItem = await _dbContext.InventoryItems.FindAsync(imageTO.InventoryItemId);
                 if (inventoryItem == null)
                 {
                     return BadRequest("Invalid inventory item ID");
@@ -73,15 +63,15 @@ namespace VULTIME.VINV.API.Controllers
                     return BadRequest("Image data cannot be null or empty");
                 }
 
-                var image = new InventoryItemImage
+                InventoryItemImage image = new()
                 {
                     Id = Guid.NewGuid(),
                     ImageData = imageTO.ImageData,
                     InventoryItemId = imageTO.InventoryItemId
                 };
 
-                _dbContext.InventoryItemImages.Add(image);
-                await _dbContext.SaveChangesAsync();
+                _ = _dbContext.InventoryItemImages.Add(image);
+                _ = await _dbContext.SaveChangesAsync();
 
                 return CreatedAtAction(nameof(GetImage), new { id = image.Id }, image);
             }
@@ -96,14 +86,14 @@ namespace VULTIME.VINV.API.Controllers
         {
             try
             {
-                var image = await _dbContext.InventoryItemImages.FindAsync(id);
+                InventoryItemImage? image = await _dbContext.InventoryItemImages.FindAsync(id);
                 if (image == null)
                 {
                     return NotFound("Image not found");
                 }
 
-                _dbContext.InventoryItemImages.Remove(image);
-                await _dbContext.SaveChangesAsync();
+                _ = _dbContext.InventoryItemImages.Remove(image);
+                _ = await _dbContext.SaveChangesAsync();
 
                 return Ok();
             }

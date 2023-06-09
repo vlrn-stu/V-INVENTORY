@@ -18,14 +18,9 @@ namespace VULTIME.VINV.API.Controllers
         [HttpGet]
         public async Task<ActionResult<InventoryItemStatistics>> GetInventoryItemStatisticsAsync([FromQuery] bool forceRefresh = false)
         {
-            var statistics = await _inventoryItemStatisticsProvider.GetInventoryItemStatisticsAsync(forceRefresh);
+            InventoryItemStatistics? statistics = await _inventoryItemStatisticsProvider.GetInventoryItemStatisticsAsync(forceRefresh);
 
-            if (statistics == null)
-            {
-                return NotFound();
-            }
-
-            return statistics;
+            return statistics == null ? (ActionResult<InventoryItemStatistics>)NotFound() : (ActionResult<InventoryItemStatistics>)statistics;
         }
     }
 }

@@ -15,11 +15,11 @@ namespace VULTIME.VINV.WEB.Services
 
         public async Task<InventoryItemStatistics?> GetInventoryItemStatistics()
         {
-            var response = await _httpClient.GetAsync("api/InventoryItemStatistics");
+            HttpResponseMessage response = await _httpClient.GetAsync("api/InventoryItemStatistics");
 
             if (response.IsSuccessStatusCode)
             {
-                var content = await response.Content.ReadAsStringAsync();
+                string content = await response.Content.ReadAsStringAsync();
                 return JsonSerializer.Deserialize<InventoryItemStatistics>(content, _options);
             }
 

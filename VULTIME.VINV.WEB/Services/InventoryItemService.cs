@@ -1,5 +1,4 @@
-﻿using System.Net;
-using System.Text;
+﻿using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Text.RegularExpressions;
@@ -22,11 +21,11 @@ namespace VULTIME.VINV.WEB.Services
 
         public async Task<InventoryItem?> GetInventoryItem(Guid id)
         {
-            var response = await _httpClient.GetAsync($"api/InventoryItem/{id}");
+            HttpResponseMessage response = await _httpClient.GetAsync($"api/InventoryItem/{id}");
 
             if (response.IsSuccessStatusCode)
             {
-                var content = await response.Content.ReadAsStringAsync();
+                string content = await response.Content.ReadAsStringAsync();
                 return JsonSerializer.Deserialize<InventoryItem>(content, _options);
             }
 
@@ -35,13 +34,13 @@ namespace VULTIME.VINV.WEB.Services
 
         public async Task<(List<InventoryItem>? Items, int TotalCount)> SearchInventoryItemsByName(string nameFilter = "", int skip = 0, int top = 10)
         {
-            var filterQuery = string.IsNullOrEmpty(nameFilter) ? "" : $"&$filter=Contains(Name,'{Regex.Replace(nameFilter, "[^a-zA-Z0-9_]+", "")}')";
-            var response = await _httpClient.GetAsync($"odata/InventoryItems?$skip={skip}&$top={top}&$count=true{filterQuery}");
+            string filterQuery = string.IsNullOrEmpty(nameFilter) ? "" : $"&$filter=Contains(Name,'{Regex.Replace(nameFilter, "[^a-zA-Z0-9_]+", "")}')";
+            HttpResponseMessage response = await _httpClient.GetAsync($"odata/InventoryItems?$skip={skip}&$top={top}&$count=true{filterQuery}");
 
             if (response.IsSuccessStatusCode)
             {
-                var content = await response.Content.ReadAsStringAsync();
-                var result = JsonSerializer.Deserialize<ODataResponse<InventoryItem>>(content, _options);
+                string content = await response.Content.ReadAsStringAsync();
+                ODataResponse<InventoryItem>? result = JsonSerializer.Deserialize<ODataResponse<InventoryItem>>(content, _options);
                 return (result?.Value, result?.Count ?? 0);
             }
 
@@ -56,16 +55,16 @@ namespace VULTIME.VINV.WEB.Services
 
         public async Task<InventoryItem?> CreateInventoryItem(InventoryItemTO item)
         {
-            var itemJson = new StringContent(
+            StringContent itemJson = new(
                 JsonSerializer.Serialize(item),
                 Encoding.UTF8,
                 "application/json");
 
-            var response = await _httpClient.PostAsync("api/InventoryItem", itemJson);
+            HttpResponseMessage response = await _httpClient.PostAsync("api/InventoryItem", itemJson);
 
             if (response.IsSuccessStatusCode)
             {
-                var content = await response.Content.ReadAsStringAsync();
+                string content = await response.Content.ReadAsStringAsync();
                 Console.WriteLine(content);
                 return JsonSerializer.Deserialize<InventoryItem>(content, _options);
             }
@@ -75,16 +74,16 @@ namespace VULTIME.VINV.WEB.Services
 
         public async Task<InventoryItem?> UpdateInventoryItem(InventoryItemTO item)
         {
-            var itemJson = new StringContent(
+            StringContent itemJson = new(
                 JsonSerializer.Serialize(item),
                 Encoding.UTF8,
                 "application/json");
 
-            var response = await _httpClient.PutAsync($"api/InventoryItem", itemJson);
+            HttpResponseMessage response = await _httpClient.PutAsync($"api/InventoryItem", itemJson);
 
             if (response.IsSuccessStatusCode)
             {
-                var content = await response.Content.ReadAsStringAsync();
+                string content = await response.Content.ReadAsStringAsync();
                 return JsonSerializer.Deserialize<InventoryItem>(content, _options);
             }
 
@@ -93,7 +92,7 @@ namespace VULTIME.VINV.WEB.Services
 
         public async Task<bool> DeleteInventoryItem(Guid id)
         {
-            var response = await _httpClient.DeleteAsync($"api/InventoryItem/{id}");
+            HttpResponseMessage response = await _httpClient.DeleteAsync($"api/InventoryItem/{id}");
 
             return response.IsSuccessStatusCode;
         }

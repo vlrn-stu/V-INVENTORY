@@ -22,36 +22,26 @@ namespace VULTIME.VINV.API.Statisctics
                 new List<EntityOperation> { EntityOperation.Create, EntityOperation.Update, EntityOperation.Delete },
                 async args =>
             {
-                await CalculateStatisticsAsync();
+                _ = await CalculateStatisticsAsync();
             });
         }
 
         public async Task<InventoryItemStatistics?> GetInventoryItemStatisticsAsync(bool forceRefresh = false)
         {
-            if (!forceRefresh && inventoryItemStatictics != null)
-            {
-                return inventoryItemStatictics;
-            }
-
-            if (await CalculateStatisticsAsync())
-            {
-                return inventoryItemStatictics;
-            }
-            else
-            {
-                return null;
-            }
+            return !forceRefresh && inventoryItemStatictics != null
+                ? inventoryItemStatictics
+                : await CalculateStatisticsAsync() ? inventoryItemStatictics : null;
         }
 
         private async Task<bool> CalculateStatisticsAsync()
         {
             try
             {
-                using var _dbContext = _contextFactory.CreateDbContext();
-                var now = DateTimeOffset.UtcNow;
-                var oneMonthAgo = now.AddMonths(-1);
+                using InventoryDbContext _dbContext = _contextFactory.CreateDbContext();
+                DateTimeOffset now = DateTimeOffset.UtcNow;
+                DateTimeOffset oneMonthAgo = now.AddMonths(-1);
 
-                var newStatistics = new InventoryItemStatistics
+                InventoryItemStatistics newStatistics = new()
                 {
                     TotalItemCount = await _dbContext.InventoryItems.CountAsync(),
 

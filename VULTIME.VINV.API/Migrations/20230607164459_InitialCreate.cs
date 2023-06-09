@@ -1,5 +1,4 @@
-﻿using System;
-using Microsoft.EntityFrameworkCore.Migrations;
+﻿using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
@@ -11,7 +10,7 @@ namespace V_INVENTORY_API.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.CreateTable(
+            _ = migrationBuilder.CreateTable(
                 name: "InventoryItemLocations",
                 columns: table => new
                 {
@@ -20,10 +19,10 @@ namespace V_INVENTORY_API.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_InventoryItemLocations", x => x.Id);
+                    _ = table.PrimaryKey("PK_InventoryItemLocations", x => x.Id);
                 });
 
-            migrationBuilder.CreateTable(
+            _ = migrationBuilder.CreateTable(
                 name: "InventoryItems",
                 columns: table => new
                 {
@@ -40,8 +39,8 @@ namespace V_INVENTORY_API.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_InventoryItems", x => x.Id);
-                    table.ForeignKey(
+                    _ = table.PrimaryKey("PK_InventoryItems", x => x.Id);
+                    _ = table.ForeignKey(
                         name: "FK_InventoryItems_InventoryItemLocations_LocationId",
                         column: x => x.LocationId,
                         principalTable: "InventoryItemLocations",
@@ -49,7 +48,7 @@ namespace V_INVENTORY_API.Migrations
                         onDelete: ReferentialAction.Cascade);
                 });
 
-            migrationBuilder.CreateTable(
+            _ = migrationBuilder.CreateTable(
                 name: "InventoryItemImages",
                 columns: table => new
                 {
@@ -59,8 +58,8 @@ namespace V_INVENTORY_API.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_InventoryItemImages", x => x.Id);
-                    table.ForeignKey(
+                    _ = table.PrimaryKey("PK_InventoryItemImages", x => x.Id);
+                    _ = table.ForeignKey(
                         name: "FK_InventoryItemImages_InventoryItems_InventoryItemId",
                         column: x => x.InventoryItemId,
                         principalTable: "InventoryItems",
@@ -68,12 +67,12 @@ namespace V_INVENTORY_API.Migrations
                         onDelete: ReferentialAction.Cascade);
                 });
 
-            migrationBuilder.CreateIndex(
+            _ = migrationBuilder.CreateIndex(
                 name: "IX_InventoryItemImages_InventoryItemId",
                 table: "InventoryItemImages",
                 column: "InventoryItemId");
 
-            migrationBuilder.CreateIndex(
+            _ = migrationBuilder.CreateIndex(
                 name: "IX_InventoryItems_LocationId",
                 table: "InventoryItems",
                 column: "LocationId");
@@ -82,13 +81,13 @@ namespace V_INVENTORY_API.Migrations
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropTable(
+            _ = migrationBuilder.DropTable(
                 name: "InventoryItemImages");
 
-            migrationBuilder.DropTable(
+            _ = migrationBuilder.DropTable(
                 name: "InventoryItems");
 
-            migrationBuilder.DropTable(
+            _ = migrationBuilder.DropTable(
                 name: "InventoryItemLocations");
         }
     }

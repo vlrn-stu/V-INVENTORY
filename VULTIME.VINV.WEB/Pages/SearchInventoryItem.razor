@@ -1,4 +1,5 @@
 ﻿@page "/InventoryItem/Search"
+@using Microsoft.AspNetCore.WebUtilities;
 @using VULTIME.VINV.Common.Models
 @inject InventoryItemService ItemService
 @inject NavigationManager Navigation
@@ -7,7 +8,7 @@
 
 <div class="mb-3">
     <label for="searchBox" class="form-label">Search:</label>
-    <input type="text" class="form-control" id="searchBox" @oninput="SearchItems" />
+    <input type="text" class="form-control" id="searchBox" @oninput="SearchItems" @bind="@searchQuery"/>
 </div>
 
 @if (InventoryItems == null)
@@ -61,9 +62,15 @@ else
 
     protected override async Task OnInitializedAsync()
     {
-        var result = await ItemService.SearchInventoryItemsByName(top: pageSize);
-        InventoryItems = result.Items;
-        totalCount = result.TotalCount;
+        var uri = new Uri(Navigation.Uri);
+        Console.WriteLine(uri);
+        if (QueryHelpers.ParseQuery(uri.Query).TryGetValue("q", out var query))
+        {
+            Console.WriteLine(query);
+            searchQuery = query;
+        }
+
+        await UpdateItems();
     }
 
     private async Task UpdateItems()

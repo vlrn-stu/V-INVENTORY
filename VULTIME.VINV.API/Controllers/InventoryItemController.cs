@@ -1,10 +1,10 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using VULTIME.VINV.Common.Models;
-using VULTIME.VINV.Common.DataContracts;
-using VULTIME.VINV.API.DB;
-using VULTIME.Core.Data.Notifications;
 using VULTIME.Core.Data.Enums;
+using VULTIME.Core.Data.Notifications;
+using VULTIME.VINV.API.DB;
+using VULTIME.VINV.Common.DataContracts;
+using VULTIME.VINV.Common.Models;
 
 namespace VULTIME.VINV.API.Controllers
 {
@@ -20,25 +20,26 @@ namespace VULTIME.VINV.API.Controllers
             _dbContext = dbContext;
             _notificationManager = notificationManager;
         }
+
 #if DEBUG
+
         [HttpPost("GenerateRandom/{count}")]
         public async Task<IActionResult> GenerateRandomInventoryItems([FromRoute] int count)
         {
             try
             {
-                // check if there's at least one location
-                var firstLocation = await _dbContext.InventoryItemLocations.FirstOrDefaultAsync();
-                if (firstLocation == null)
+                List<InventoryItemLocation> locations = await _dbContext.InventoryItemLocations.ToListAsync();
+                if (!locations.Any())
                 {
                     return BadRequest("At least one location is required to generate random items.");
                 }
 
-                var random = new Random();
-                var inventoryItems = new List<InventoryItem>();
+                Random random = new();
+                List<InventoryItem> inventoryItems = new();
 
-                for (var i = 0; i < count; i++)
+                for (int i = 0; i < count; i++)
                 {
-                    var item = new InventoryItem
+                    InventoryItem item = new()
                     {
                         Id = Guid.NewGuid(),
                         Name = $"Item {Guid.NewGuid()}",
@@ -47,7 +48,7 @@ namespace VULTIME.VINV.API.Controllers
                                      .OrderBy(_ => random.Next())
                                      .FirstOrDefault(),
                         Description = $"Description {Guid.NewGuid()}",
-                        LocationId = firstLocation.Id,
+                        LocationId = locations[random.Next(0, locations.Count - 1)].Id,
                         Quantity = random.Next(1, 101),
                         OriginalPrice = (decimal)random.NextDouble() * 100,
                         BuyDate = DateTimeOffset.Now.AddDays(-random.Next(0, 365)).ToOffset(TimeSpan.Zero)
@@ -57,37 +58,31 @@ namespace VULTIME.VINV.API.Controllers
                 }
 
                 await _dbContext.AddRangeAsync(inventoryItems);
-                await _dbContext.SaveChangesAsync();
+                _ = await _dbContext.SaveChangesAsync();
 
-                foreach (var item in inventoryItems)
-                {
-                    _notificationManager.Notify(typeof(InventoryItem), EntityOperation.Create, item.Id);
-                }
+                _notificationManager.Notify(typeof(InventoryItem), EntityOperation.Create, Guid.Empty);
 
-                return Ok(inventoryItems);
+                return Ok();
             }
             catch (Exception)
             {
                 return StatusCode(StatusCodes.Status500InternalServerError);
             }
         }
+
 #endif
+
         [HttpGet("{id}")]
         public async Task<IActionResult> GetInventoryItem([FromRoute] Guid id)
         {
             try
             {
-                var inventoryItem = await _dbContext.InventoryItems
+                InventoryItem? inventoryItem = await _dbContext.InventoryItems
                     .Include(i => i.Images)
                     .Include(i => i.Location)
                     .FirstOrDefaultAsync(i => i.Id == id);
 
-                if (inventoryItem == null)
-                {
-                    return NotFound();
-                }
-
-                return Ok(inventoryItem);
+                return inventoryItem == null ? NotFound() : Ok(inventoryItem);
             }
             catch (Exception ex)
             {
@@ -100,14 +95,9 @@ namespace VULTIME.VINV.API.Controllers
         {
             try
             {
-                var inventoryItem = await _dbContext.InventoryItems.FindAsync(id);
+                InventoryItem? inventoryItem = await _dbContext.InventoryItems.FindAsync(id);
 
-                if (inventoryItem == null)
-                {
-                    return NotFound();
-                }
-
-                return Ok(inventoryItem);
+                return inventoryItem == null ? NotFound() : Ok(inventoryItem);
             }
             catch (Exception ex)
             {
@@ -120,12 +110,12 @@ namespace VULTIME.VINV.API.Controllers
         {
             try
             {
-                var location = await _dbContext.InventoryItemLocations.FindAsync(locationId);
+                InventoryItemLocation? location = await _dbContext.InventoryItemLocations.FindAsync(locationId);
                 if (location == null)
                 {
                     return NotFound("Location not found");
                 }
-                var inventoryItems = await _dbContext.InventoryItems
+                List<InventoryItem> inventoryItems = await _dbContext.InventoryItems
                     .Include(i => i.Images)
                     .Include(i => i.Location)
                     .Where(i => i.LocationId == locationId)
@@ -143,12 +133,12 @@ namespace VULTIME.VINV.API.Controllers
         {
             try
             {
-                var location = await _dbContext.InventoryItemLocations.FindAsync(locationId);
+                InventoryItemLocation? location = await _dbContext.InventoryItemLocations.FindAsync(locationId);
                 if (location == null)
                 {
                     return NotFound("Location not found");
                 }
-                var inventoryItems = await _dbContext.InventoryItems
+                List<InventoryItem> inventoryItems = await _dbContext.InventoryItems
                     .Where(i => i.LocationId == locationId)
                     .ToListAsync();
                 return Ok(inventoryItems);
@@ -164,13 +154,13 @@ namespace VULTIME.VINV.API.Controllers
         {
             try
             {
-                var location = await _dbContext.InventoryItemLocations.FindAsync(inventoryItemTO.LocationId);
+                InventoryItemLocation? location = await _dbContext.InventoryItemLocations.FindAsync(inventoryItemTO.LocationId);
                 if (location == null)
                 {
                     return NotFound("Location not found");
                 }
 
-                var inventoryItem = new InventoryItem
+                InventoryItem inventoryItem = new()
                 {
                     Id = Guid.NewGuid(),
                     Name = inventoryItemTO.Name ?? throw new ArgumentNullException(nameof(inventoryItemTO.Name)),
@@ -182,8 +172,8 @@ namespace VULTIME.VINV.API.Controllers
                     BuyDate = inventoryItemTO.BuyDate.ToOffset(TimeSpan.Zero)
                 };
 
-                _dbContext.InventoryItems.Add(inventoryItem);
-                await _dbContext.SaveChangesAsync();
+                _ = _dbContext.InventoryItems.Add(inventoryItem);
+                _ = await _dbContext.SaveChangesAsync();
 
                 _notificationManager.Notify(typeof(InventoryItem), EntityOperation.Create, inventoryItem.Id);
 
@@ -208,13 +198,13 @@ namespace VULTIME.VINV.API.Controllers
         {
             try
             {
-                var location = await _dbContext.InventoryItemLocations.FindAsync(inventoryItemTO.LocationId);
+                InventoryItemLocation? location = await _dbContext.InventoryItemLocations.FindAsync(inventoryItemTO.LocationId);
                 if (location == null)
                 {
                     return NotFound("Location not found");
                 }
 
-                var inventoryItem = await _dbContext.InventoryItems.FindAsync(inventoryItemTO.Id);
+                InventoryItem? inventoryItem = await _dbContext.InventoryItems.FindAsync(inventoryItemTO.Id);
                 if (inventoryItem == null)
                 {
                     return NotFound("Inventory item not found");
@@ -228,8 +218,8 @@ namespace VULTIME.VINV.API.Controllers
                 inventoryItem.OriginalPrice = inventoryItemTO.OriginalPrice;
                 inventoryItem.BuyDate = inventoryItemTO.BuyDate;
 
-                _dbContext.InventoryItems.Update(inventoryItem);
-                await _dbContext.SaveChangesAsync();
+                _ = _dbContext.InventoryItems.Update(inventoryItem);
+                _ = await _dbContext.SaveChangesAsync();
 
                 _notificationManager.Notify(typeof(InventoryItem), EntityOperation.Update, inventoryItem.Id);
 
@@ -254,14 +244,14 @@ namespace VULTIME.VINV.API.Controllers
         {
             try
             {
-                var inventoryItem = await _dbContext.InventoryItems.FindAsync(id);
+                InventoryItem? inventoryItem = await _dbContext.InventoryItems.FindAsync(id);
                 if (inventoryItem == null)
                 {
                     return NotFound("Inventory item not found");
                 }
 
-                _dbContext.InventoryItems.Remove(inventoryItem);
-                await _dbContext.SaveChangesAsync();
+                _ = _dbContext.InventoryItems.Remove(inventoryItem);
+                _ = await _dbContext.SaveChangesAsync();
 
                 _notificationManager.Notify(typeof(InventoryItem), EntityOperation.Delete, inventoryItem.Id);
 

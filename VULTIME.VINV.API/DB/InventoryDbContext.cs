@@ -16,13 +16,13 @@ namespace VULTIME.VINV.API.DB
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            modelBuilder.Entity<InventoryItem>()
+            _ = modelBuilder.Entity<InventoryItem>()
                 .HasMany(i => i.Images)
                 .WithOne(img => img.InventoryItem)
                 .HasForeignKey(img => img.InventoryItemId)
                 .OnDelete(DeleteBehavior.Cascade);
 
-            modelBuilder.Entity<InventoryItem>()
+            _ = modelBuilder.Entity<InventoryItem>()
                 .HasOne(i => i.Location)
                 .WithMany()
                 .HasForeignKey(i => i.LocationId);
@@ -42,13 +42,13 @@ namespace VULTIME.VINV.API.DB
 
         private void UpdateTimestamps()
         {
-            var entries = ChangeTracker
+            IEnumerable<Microsoft.EntityFrameworkCore.ChangeTracking.EntityEntry> entries = ChangeTracker
                 .Entries()
                 .Where(e => e.Entity is ITimestampedEntity && (
                         e.State == EntityState.Added
                         || e.State == EntityState.Modified));
 
-            foreach (var entityEntry in entries)
+            foreach (Microsoft.EntityFrameworkCore.ChangeTracking.EntityEntry? entityEntry in entries)
             {
                 ((ITimestampedEntity)entityEntry.Entity).UpdatedAt = DateTimeOffset.UtcNow;
 

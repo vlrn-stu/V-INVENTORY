@@ -1,13 +1,48 @@
 ﻿@using VULTIME.VINV.Common.Models.Statistics
 @inject InventoryItemStatisticsService StatisticsService
 
+<style>
+    .loading {
+        opacity: 0.5;
+    }
+</style>
+
 @if (InventoryItemStatistics == null)
 {
-    <p>Loading...</p>
+    <div class="card text-center">
+        <div class="card-header">
+            <h2>Inventory Statistics</h2>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-body loading">
+                            <h3 class="card-title">Total Item Count</h3>
+                            <p class="card-text display-4">?</p>
+                            <p class="card-text">? this month</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-body loading">
+                            <h3 class="card-title">Total Value</h3>
+                            <p class="card-text display-4">?</p>
+                            <p class="card-text">? this month</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 }
 else
 {
     <div class="card text-center">
+        <div class="card-header">
+            <h2>Inventory Statistics</h2>
+        </div>
         <div class="card-body">
             <div class="row">
                 <div class="col-md-6">

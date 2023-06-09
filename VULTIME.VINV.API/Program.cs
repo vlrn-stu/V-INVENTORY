@@ -7,7 +7,7 @@ using VULTIME.VINV.API.DB;
 using VULTIME.VINV.API.Statisctics;
 using VULTIME.VINV.Common.Models;
 
-var builder = WebApplication.CreateBuilder(args);
+WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddDbContextFactory<InventoryDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
@@ -28,20 +28,20 @@ builder.Services.AddCors(options =>
 {
     options.AddDefaultPolicy(builder =>
     {
-        builder.AllowAnyOrigin()
+        _ = builder.AllowAnyOrigin()
             .AllowAnyMethod()
             .AllowAnyHeader();
     });
 });
 
-var app = builder.Build();
+WebApplication app = builder.Build();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
-    app.UseSwagger();
-    app.UseSwaggerUI();
-    app.UseCors();
+    _ = app.UseSwagger();
+    _ = app.UseSwaggerUI();
+    _ = app.UseCors();
 }
 
 app.UseHttpsRedirection();
@@ -50,9 +50,9 @@ app.UseAuthorization();
 
 app.MapControllers();
 
-using (var scope = app.Services.CreateScope())
+using (IServiceScope scope = app.Services.CreateScope())
 {
-    var dbContext = scope.ServiceProvider.GetRequiredService<InventoryDbContext>();
+    InventoryDbContext dbContext = scope.ServiceProvider.GetRequiredService<InventoryDbContext>();
     dbContext.Database.Migrate();
 }
 
@@ -60,8 +60,8 @@ app.Run();
 
 static IEdmModel GetEdmModel()
 {
-    var builder = new ODataConventionModelBuilder();
-    builder.EntitySet<InventoryItem>("InventoryItems");
-    builder.EntitySet<InventoryItemLocation>("InventoryItemLocations");
+    ODataConventionModelBuilder builder = new();
+    _ = builder.EntitySet<InventoryItem>("InventoryItems");
+    _ = builder.EntitySet<InventoryItemLocation>("InventoryItemLocations");
     return builder.GetEdmModel();
 }

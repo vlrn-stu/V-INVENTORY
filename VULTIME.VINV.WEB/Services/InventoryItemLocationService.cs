@@ -17,12 +17,12 @@ namespace VULTIME.VINV.WEB.Services
 
         public async Task<IEnumerable<InventoryItemLocation>> GetAllInventoryItemLocations()
         {
-            var response = await _httpClient.GetAsync("odata/InventoryItemLocations");
+            HttpResponseMessage response = await _httpClient.GetAsync("odata/InventoryItemLocations");
 
             if (response.IsSuccessStatusCode)
             {
-                var content = await response.Content.ReadAsStringAsync();
-                var result = JsonSerializer.Deserialize<ODataResponse<InventoryItemLocation>>(content, _options);
+                string content = await response.Content.ReadAsStringAsync();
+                ODataResponse<InventoryItemLocation>? result = JsonSerializer.Deserialize<ODataResponse<InventoryItemLocation>>(content, _options);
                 return result?.Value ?? new List<InventoryItemLocation>();
             }
 
@@ -31,11 +31,11 @@ namespace VULTIME.VINV.WEB.Services
 
         public async Task<InventoryItemLocation?> GetInventoryItemLocation(Guid id)
         {
-            var response = await _httpClient.GetAsync($"api/InventoryItemLocation/{id}");
+            HttpResponseMessage response = await _httpClient.GetAsync($"api/InventoryItemLocation/{id}");
 
             if (response.IsSuccessStatusCode)
             {
-                var content = await response.Content.ReadAsStringAsync();
+                string content = await response.Content.ReadAsStringAsync();
                 return JsonSerializer.Deserialize<InventoryItemLocation>(content, _options);
             }
 
@@ -44,16 +44,16 @@ namespace VULTIME.VINV.WEB.Services
 
         public async Task<InventoryItemLocation?> CreateInventoryItemLocation(InventoryItemLocation itemLocation)
         {
-            var itemLocationJson = new StringContent(
+            StringContent itemLocationJson = new(
                 JsonSerializer.Serialize(itemLocation),
                 Encoding.UTF8,
                 "application/json");
 
-            var response = await _httpClient.PostAsync("api/inventoryitemlocation", itemLocationJson);
+            HttpResponseMessage response = await _httpClient.PostAsync("api/inventoryitemlocation", itemLocationJson);
 
             if (response.IsSuccessStatusCode)
             {
-                var content = await response.Content.ReadAsStringAsync();
+                string content = await response.Content.ReadAsStringAsync();
                 return JsonSerializer.Deserialize<InventoryItemLocation>(content, _options);
             }
 
@@ -62,16 +62,16 @@ namespace VULTIME.VINV.WEB.Services
 
         public async Task<InventoryItemLocation?> UpdateInventoryItemLocation(InventoryItemLocation itemLocation)
         {
-            var itemLocationJson = new StringContent(
+            StringContent itemLocationJson = new(
                 JsonSerializer.Serialize(itemLocation),
                 Encoding.UTF8,
                 "application/json");
 
-            var response = await _httpClient.PutAsync($"api/inventoryitemlocation/{itemLocation.Id}", itemLocationJson);
+            HttpResponseMessage response = await _httpClient.PutAsync($"api/inventoryitemlocation/{itemLocation.Id}", itemLocationJson);
 
             if (response.IsSuccessStatusCode)
             {
-                var content = await response.Content.ReadAsStringAsync();
+                string content = await response.Content.ReadAsStringAsync();
                 return JsonSerializer.Deserialize<InventoryItemLocation>(content, _options);
             }
 
@@ -80,7 +80,7 @@ namespace VULTIME.VINV.WEB.Services
 
         public async Task<bool> DeleteInventoryItemLocation(Guid id)
         {
-            var response = await _httpClient.DeleteAsync($"api/inventoryitemlocation/{id}");
+            HttpResponseMessage response = await _httpClient.DeleteAsync($"api/inventoryitemlocation/{id}");
 
             return response.IsSuccessStatusCode;
         }
