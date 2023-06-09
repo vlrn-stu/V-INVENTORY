@@ -2,13 +2,21 @@ using Microsoft.AspNetCore.OData;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OData.Edm;
 using Microsoft.OData.ModelBuilder;
+using VULTIME.Core.Data.Notifications;
 using VULTIME.VINV.API.DB;
+using VULTIME.VINV.API.Statisctics;
 using VULTIME.VINV.Common.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Services.AddDbContextFactory<InventoryDbContext>(options =>
+    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+
 builder.Services.AddDbContext<InventoryDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+builder.Services.AddSingleton<INotificationManager, NotificationManager>();
+builder.Services.AddSingleton<InventoryItemStatisticsProvider>();
 
 builder.Services.AddControllers()
     .AddOData(opt => opt.Count().Filter().Expand().Select().OrderBy().SetMaxTop(100)

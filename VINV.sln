@@ -16,7 +16,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		.editorconfig = .editorconfig
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VULTIME.Core.Data", "..\VULTIME.Core.Data\VULTIME.Core.Data.csproj", "{2E0AC234-8195-4B8E-898E-9BC961B773FE}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VULTIME.Core.Data", "..\VULTIME.Core.Data\VULTIME.Core.Data.csproj", "{2E0AC234-8195-4B8E-898E-9BC961B773FE}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

@@ -21,6 +21,7 @@ builder.Services.AddHttpClient("InventoryAPI", client =>
 builder.Services.AddSingleton<InventoryItemService>();
 builder.Services.AddSingleton<InventoryItemLocationService>();
 builder.Services.AddSingleton<InventoryItemImageService>();
+builder.Services.AddSingleton<InventoryItemStatisticsService>();
 
 #endregion Services
 

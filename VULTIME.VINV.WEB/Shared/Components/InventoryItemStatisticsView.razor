@@ -1,0 +1,53 @@
+﻿@using VULTIME.VINV.Common.Models.Statistics
+@inject InventoryItemStatisticsService StatisticsService
+
+@if (InventoryItemStatistics == null)
+{
+    <p>Loading...</p>
+}
+else
+{
+    <div class="card text-center">
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-body">
+                            <h3 class="card-title">Total Item Count</h3>
+                            <p class="card-text display-4">@InventoryItemStatistics.TotalItemCount</p>
+                            <p class="card-text">
+                                <span class="@(InventoryItemStatistics.TotalItemCountDeltaMonth >= 0 ? "text-success" : "text-danger")">
+                                    <i class="fas @(InventoryItemStatistics.TotalItemCountDeltaMonth >= 0 ? "fa-arrow-up" : "fa-arrow-down")"></i>
+                                    @InventoryItemStatistics.TotalItemCountDeltaMonth this month
+                                </span>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-body">
+                            <h3 class="card-title">Total Value</h3>
+                            <p class="card-text display-4">@InventoryItemStatistics.TotalValue.ToString("C")</p>
+                            <p class="card-text">
+                                <span class="@(InventoryItemStatistics.ValueDeltaMonth >= 0 ? "text-success" : "text-danger")">
+                                    <i class="fas @(InventoryItemStatistics.ValueDeltaMonth >= 0 ? "fa-arrow-up" : "fa-arrow-down")"></i>
+                                    @InventoryItemStatistics.ValueDeltaMonth.ToString("C") this month
+                                </span>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    private InventoryItemStatistics? InventoryItemStatistics;
+
+    protected override async Task OnInitializedAsync()
+    {
+        InventoryItemStatistics = await StatisticsService.GetInventoryItemStatistics();
+    }
+}

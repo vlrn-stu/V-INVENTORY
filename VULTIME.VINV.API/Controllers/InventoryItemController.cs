@@ -3,6 +3,8 @@ using Microsoft.EntityFrameworkCore;
 using VULTIME.VINV.Common.Models;
 using VULTIME.VINV.Common.DataContracts;
 using VULTIME.VINV.API.DB;
+using VULTIME.Core.Data.Notifications;
+using VULTIME.Core.Data.Enums;
 
 namespace VULTIME.VINV.API.Controllers
 {
@@ -11,12 +13,65 @@ namespace VULTIME.VINV.API.Controllers
     public class InventoryItemController : ControllerBase
     {
         private readonly InventoryDbContext _dbContext;
+        private readonly INotificationManager _notificationManager;
 
-        public InventoryItemController(InventoryDbContext dbContext)
+        public InventoryItemController(InventoryDbContext dbContext, INotificationManager notificationManager)
         {
             _dbContext = dbContext;
+            _notificationManager = notificationManager;
         }
+#if DEBUG
+        [HttpPost("GenerateRandom/{count}")]
+        public async Task<IActionResult> GenerateRandomInventoryItems([FromRoute] int count)
+        {
+            try
+            {
+                // check if there's at least one location
+                var firstLocation = await _dbContext.InventoryItemLocations.FirstOrDefaultAsync();
+                if (firstLocation == null)
+                {
+                    return BadRequest("At least one location is required to generate random items.");
+                }
 
+                var random = new Random();
+                var inventoryItems = new List<InventoryItem>();
+
+                for (var i = 0; i < count; i++)
+                {
+                    var item = new InventoryItem
+                    {
+                        Id = Guid.NewGuid(),
+                        Name = $"Item {Guid.NewGuid()}",
+                        Status = Enum.GetValues(typeof(InventoryItemStatus))
+                                     .Cast<InventoryItemStatus>()
+                                     .OrderBy(_ => random.Next())
+                                     .FirstOrDefault(),
+                        Description = $"Description {Guid.NewGuid()}",
+                        LocationId = firstLocation.Id,
+                        Quantity = random.Next(1, 101),
+                        OriginalPrice = (decimal)random.NextDouble() * 100,
+                        BuyDate = DateTimeOffset.Now.AddDays(-random.Next(0, 365)).ToOffset(TimeSpan.Zero)
+                    };
+
+                    inventoryItems.Add(item);
+                }
+
+                await _dbContext.AddRangeAsync(inventoryItems);
+                await _dbContext.SaveChangesAsync();
+
+                foreach (var item in inventoryItems)
+                {
+                    _notificationManager.Notify(typeof(InventoryItem), EntityOperation.Create, item.Id);
+                }
+
+                return Ok(inventoryItems);
+            }
+            catch (Exception)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError);
+            }
+        }
+#endif
         [HttpGet("{id}")]
         public async Task<IActionResult> GetInventoryItem([FromRoute] Guid id)
         {
@@ -130,6 +185,8 @@ namespace VULTIME.VINV.API.Controllers
                 _dbContext.InventoryItems.Add(inventoryItem);
                 await _dbContext.SaveChangesAsync();
 
+                _notificationManager.Notify(typeof(InventoryItem), EntityOperation.Create, inventoryItem.Id);
+
                 return CreatedAtAction(nameof(GetInventoryItem), new { id = inventoryItem.Id }, inventoryItem);
             }
             catch (ArgumentNullException ex)
@@ -174,6 +231,8 @@ namespace VULTIME.VINV.API.Controllers
                 _dbContext.InventoryItems.Update(inventoryItem);
                 await _dbContext.SaveChangesAsync();
 
+                _notificationManager.Notify(typeof(InventoryItem), EntityOperation.Update, inventoryItem.Id);
+
                 return Ok(inventoryItem);
             }
             catch (ArgumentNullException ex)
@@ -203,6 +262,8 @@ namespace VULTIME.VINV.API.Controllers
 
                 _dbContext.InventoryItems.Remove(inventoryItem);
                 await _dbContext.SaveChangesAsync();
+
+                _notificationManager.Notify(typeof(InventoryItem), EntityOperation.Delete, inventoryItem.Id);
 
                 return Ok();
             }
